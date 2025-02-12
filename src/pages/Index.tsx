@@ -1,50 +1,49 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { Categories } from "@/components/Categories";
 import { motion } from "framer-motion";
 import { UserRound } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
-// Mock data for demonstration
-const products = [
-  {
-    id: 1,
-    title: "Bamboo Toothbrush Set",
-    description: "Eco-friendly bamboo toothbrushes with biodegradable packaging",
-    image: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=500",
-    price: 12.99,
-    sustainabilityScore: 9,
-    ecoFeatures: ["organic", "recyclable"],
-    category: "Home & Living"
-  },
-  {
-    id: 2,
-    title: "Organic Cotton T-Shirt",
-    description: "100% organic cotton t-shirt made with sustainable practices",
-    image: "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?q=80&w=500",
-    price: 29.99,
-    sustainabilityScore: 8,
-    ecoFeatures: ["organic", "water-saving"],
-    category: "Fashion"
-  },
-  {
-    id: 3,
-    title: "Reusable Water Bottle",
-    description: "Stainless steel water bottle with zero plastic",
-    image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=500",
-    price: 24.99,
-    sustainabilityScore: 10,
-    ecoFeatures: ["recyclable"],
-    category: "Home & Living"
-  },
-];
+async function fetchProducts() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*');
+  
+  if (error) throw error;
+  return data;
+}
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Products");
+  
+  const { data: products = [], isLoading, error } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+  });
 
   const filteredProducts = selectedCategory === "All Products"
     ? products
     : products.filter(product => product.category === selectedCategory);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-eco-background flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-eco-background flex items-center justify-center">
+        <p className="text-lg text-red-600">Error loading products. Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-eco-background">
