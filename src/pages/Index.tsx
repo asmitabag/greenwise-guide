@@ -77,7 +77,15 @@ const Index = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} {...product} />
+            <ProductCard 
+              key={product.id}
+              title={product.title}
+              description={product.description || ''}
+              image={product.image_url || ''}
+              price={product.price}
+              sustainabilityScore={product.sustainability_score}
+              ecoFeatures={product.eco_features}
+            />
           ))}
         </div>
       </div>
