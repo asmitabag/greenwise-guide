@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { Categories } from "@/components/Categories";
 import { motion } from "framer-motion";
-import { UserRound } from "lucide-react";
+import { UserRound, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 async function fetchProducts() {
   const { data, error } = await supabase
@@ -17,12 +18,31 @@ async function fetchProducts() {
   return data;
 }
 
+async function fetchCartItemsCount() {
+  const { data: session } = await supabase.auth.getSession();
+  if (!session?.session?.user) return 0;
+
+  const { count, error } = await supabase
+    .from('cart_items')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', session.session.user.id);
+
+  if (error) return 0;
+  return count || 0;
+}
+
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   
   const { data: products = [], isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
+  });
+
+  const { data: cartItemsCount = 0 } = useQuery({
+    queryKey: ['cartItems'],
+    queryFn: fetchCartItemsCount,
+    refetchInterval: 5000, // Refetch every 5 seconds
   });
 
   const filteredProducts = selectedCategory === "All Products"
@@ -48,7 +68,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-eco-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-end mb-6">
+        <div className="flex justify-end mb-6 gap-4">
+          <Link 
+            to="/cart" 
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-eco-primary text-white hover:bg-eco-primary/90 transition-colors relative"
+          >
+            <ShoppingCart size={20} />
+            <span>Cart</span>
+            {cartItemsCount > 0 && (
+              <Badge 
+                className="absolute -top-2 -right-2 bg-eco-accent text-white"
+                variant="secondary"
+              >
+                {cartItemsCount}
+              </Badge>
+            )}
+          </Link>
           <Link 
             to="/profile" 
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-eco-primary text-white hover:bg-eco-primary/90 transition-colors"
@@ -79,6 +114,7 @@ const Index = () => {
           {filteredProducts.map((product) => (
             <ProductCard 
               key={product.id}
+              id={product.id}
               title={product.title}
               description={product.description || ''}
               image={product.image_url || ''}

@@ -1,7 +1,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Leaf, Recycle, Droplets } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Leaf, Recycle, Droplets, ShoppingCart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProductCardProps {
   title: string;
@@ -10,6 +13,7 @@ interface ProductCardProps {
   price: number;
   sustainabilityScore: number;
   ecoFeatures: string[];
+  id?: string;
 }
 
 export const ProductCard = ({
@@ -19,7 +23,57 @@ export const ProductCard = ({
   price,
   sustainabilityScore,
   ecoFeatures,
+  id,
 }: ProductCardProps) => {
+  const { toast } = useToast();
+
+  const handleAddToCart = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session?.session?.user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to add items to your cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Unable to add item to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('cart_items')
+      .upsert({
+        product_id: id,
+        user_id: session.session.user.id,
+        quantity: 1
+      }, {
+        onConflict: 'product_id,user_id',
+        ignoreDuplicates: false
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Added to cart",
+      description: `${title} has been added to your cart`,
+    });
+  };
+
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in bg-white">
       <div className="relative aspect-square overflow-hidden">
@@ -61,9 +115,13 @@ export const ProductCard = ({
           <span className="text-lg font-bold text-eco-secondary">
             ${price.toFixed(2)}
           </span>
-          <button className="px-4 py-2 bg-eco-primary text-white rounded-md hover:bg-eco-accent transition-colors duration-200">
-            Learn More
-          </button>
+          <Button 
+            onClick={handleAddToCart}
+            className="bg-eco-primary text-white hover:bg-eco-accent"
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Add to Cart
+          </Button>
         </div>
       </div>
     </Card>
