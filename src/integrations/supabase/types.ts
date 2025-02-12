@@ -9,7 +9,110 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      products: {
+        Row: {
+          brand: string
+          carbon_footprint: number | null
+          category: string
+          created_at: string
+          description: string | null
+          eco_features: string[]
+          id: string
+          image_url: string | null
+          materials: string[] | null
+          price: number
+          sustainability_score: number
+          title: string
+        }
+        Insert: {
+          brand: string
+          carbon_footprint?: number | null
+          category: string
+          created_at?: string
+          description?: string | null
+          eco_features: string[]
+          id?: string
+          image_url?: string | null
+          materials?: string[] | null
+          price: number
+          sustainability_score: number
+          title: string
+        }
+        Update: {
+          brand?: string
+          carbon_footprint?: number | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          eco_features?: string[]
+          id?: string
+          image_url?: string | null
+          materials?: string[] | null
+          price?: number
+          sustainability_score?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          sustainability_points: number | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          sustainability_points?: number | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          sustainability_points?: number | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          total_price: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity: number
+          total_price: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          total_price?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
