@@ -76,6 +76,44 @@ export type Database = {
           },
         ]
       }
+      material_scans: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          detected_materials: Json
+          id: string
+          product_id: string | null
+          scan_data: string
+          user_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          detected_materials: Json
+          id?: string
+          product_id?: string | null
+          scan_data: string
+          user_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          detected_materials?: Json
+          id?: string
+          product_id?: string | null
+          scan_data?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_scans_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string

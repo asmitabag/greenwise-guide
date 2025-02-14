@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,8 @@ import { Leaf, Recycle, Droplets, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MaterialAnalysis from "@/components/MaterialAnalysis";
+import MaterialScanner from "@/components/MaterialScanner";
+import { useState } from "react";
 
 interface ProductCardProps {
   title: string;
@@ -25,6 +28,7 @@ export const ProductCard = ({
   ecoFeatures,
   id,
 }: ProductCardProps) => {
+  const [showScanner, setShowScanner] = useState(false);
   const { toast } = useToast();
 
   const handleAddToCart = async () => {
@@ -74,6 +78,10 @@ export const ProductCard = ({
     });
   };
 
+  const handleScanComplete = () => {
+    setShowScanner(false);
+  };
+
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in bg-white">
       <div className="relative aspect-square overflow-hidden">
@@ -112,7 +120,25 @@ export const ProductCard = ({
           )}
         </div>
         
-        {id && <MaterialAnalysis productId={id} />}
+        {id && (
+          <>
+            <MaterialAnalysis productId={id} />
+            {!showScanner ? (
+              <Button 
+                onClick={() => setShowScanner(true)}
+                variant="outline"
+                className="w-full"
+              >
+                Scan Materials
+              </Button>
+            ) : (
+              <MaterialScanner 
+                productId={id} 
+                onScanComplete={handleScanComplete}
+              />
+            )}
+          </>
+        )}
 
         <div className="flex justify-between items-center">
           <span className="text-lg font-bold text-eco-secondary">
