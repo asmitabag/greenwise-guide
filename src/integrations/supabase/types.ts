@@ -150,7 +150,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      process_checkout: {
+        Args: {
+          p_user_id: string
+          p_total_amount: number
+          p_cart_items: Json[]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

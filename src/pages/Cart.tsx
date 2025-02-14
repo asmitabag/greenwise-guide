@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Trash2, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,8 +45,10 @@ async function fetchCartItems() {
 
 const Cart = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const { data: cartItems = [], isLoading } = useQuery({
     queryKey: ['cartItems', 'detailed'],
@@ -56,6 +58,50 @@ const Cart = () => {
   const totalAmount = cartItems.reduce((sum, item) => {
     return sum + (item.product.price * item.quantity);
   }, 0);
+
+  const handleCheckout = async () => {
+    try {
+      setIsCheckingOut(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please login to checkout",
+          variant: "destructive",
+        });
+        navigate('/auth');
+        return;
+      }
+
+      const response = await supabase.functions.invoke('process-checkout', {
+        body: {},
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      // Clear cart data from cache
+      await queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+      
+      toast({
+        title: "Success!",
+        description: "Your order has been placed successfully",
+      });
+
+      // Redirect to home page or order confirmation
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Checkout failed",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (isUpdating) return;
@@ -88,9 +134,7 @@ const Cart = () => {
         });
       }
 
-      // Refresh cart data - Fixed method name from invalidateQuery to invalidateQueries
       await queryClient.invalidateQueries({ queryKey: ['cartItems'] });
-      await queryClient.invalidateQueries({ queryKey: ['cartItems', 'detailed'] });
     } catch (error) {
       toast({
         title: "Error",
@@ -119,9 +163,7 @@ const Cart = () => {
         description: "Item has been removed from your cart",
       });
 
-      // Refresh cart data - Fixed method name from invalidateQuery to invalidateQueries
       await queryClient.invalidateQueries({ queryKey: ['cartItems'] });
-      await queryClient.invalidateQueries({ queryKey: ['cartItems', 'detailed'] });
     } catch (error) {
       toast({
         title: "Error",
@@ -232,8 +274,10 @@ const Cart = () => {
                 <Button
                   className="bg-eco-primary text-white hover:bg-eco-accent px-8"
                   size="lg"
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
                 >
-                  Proceed to Checkout
+                  {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
                 </Button>
               </div>
             </Card>
