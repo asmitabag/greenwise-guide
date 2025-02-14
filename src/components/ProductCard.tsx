@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Leaf, Recycle, Droplets, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { MaterialAnalysis } from "@/components/MaterialAnalysis";
 
 interface ProductCardProps {
   title: string;
@@ -88,10 +89,10 @@ export const ProductCard = ({
           </Badge>
         </div>
       </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-eco-secondary mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 mb-4">{description}</p>
-        <div className="flex gap-2 mb-4">
+      <div className="p-4 space-y-4">
+        <h3 className="text-lg font-semibold text-eco-secondary">{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
+        <div className="flex gap-2">
           {ecoFeatures.includes("organic") && (
             <Badge variant="outline" className="bg-eco-muted">
               <Leaf className="w-4 h-4 mr-1" />
@@ -111,6 +112,9 @@ export const ProductCard = ({
             </Badge>
           )}
         </div>
+        
+        {id && <MaterialAnalysis productId={id} />}
+
         <div className="flex justify-between items-center">
           <span className="text-lg font-bold text-eco-secondary">
             ${price.toFixed(2)}

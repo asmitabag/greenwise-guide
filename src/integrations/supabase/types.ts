@@ -41,6 +41,41 @@ export type Database = {
           },
         ]
       }
+      material_analysis: {
+        Row: {
+          created_at: string
+          eco_score: number
+          id: string
+          impact_description: string
+          material_name: string
+          product_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          eco_score: number
+          id?: string
+          impact_description: string
+          material_name: string
+          product_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          eco_score?: number
+          id?: string
+          impact_description?: string
+          material_name?: string
+          product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_analysis_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string
@@ -150,6 +185,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_product_eco_score: {
+        Args: {
+          p_product_id: string
+        }
+        Returns: number
+      }
       process_checkout: {
         Args: {
           p_user_id: string
