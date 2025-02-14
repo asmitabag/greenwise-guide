@@ -88,9 +88,9 @@ const Cart = () => {
         });
       }
 
-      // Refresh cart data
-      await queryClient.invalidateQuery({ queryKey: ['cartItems'] });
-      await queryClient.invalidateQuery({ queryKey: ['cartItems', 'detailed'] });
+      // Refresh cart data - Fixed method name from invalidateQuery to invalidateQueries
+      await queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+      await queryClient.invalidateQueries({ queryKey: ['cartItems', 'detailed'] });
     } catch (error) {
       toast({
         title: "Error",
@@ -119,9 +119,9 @@ const Cart = () => {
         description: "Item has been removed from your cart",
       });
 
-      // Refresh cart data
-      await queryClient.invalidateQuery({ queryKey: ['cartItems'] });
-      await queryClient.invalidateQuery({ queryKey: ['cartItems', 'detailed'] });
+      // Refresh cart data - Fixed method name from invalidateQuery to invalidateQueries
+      await queryClient.invalidateQueries({ queryKey: ['cartItems'] });
+      await queryClient.invalidateQueries({ queryKey: ['cartItems', 'detailed'] });
     } catch (error) {
       toast({
         title: "Error",
