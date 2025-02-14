@@ -1,11 +1,10 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Leaf, Recycle, Droplets, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { MaterialAnalysis } from "@/components/MaterialAnalysis";
+import MaterialAnalysis from "@/components/MaterialAnalysis";
 
 interface ProductCardProps {
   title: string;
