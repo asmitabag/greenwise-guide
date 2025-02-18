@@ -181,7 +181,10 @@ const SellerDashboard = () => {
                       <p className="text-sm text-gray-600">${product.price}</p>
                     </div>
                   </div>
-                  <Badge variant={product.product_verification_requests?.[0]?.status === 'approved' ? 'success' : 'warning'}>
+                  <Badge 
+                    variant={product.product_verification_requests?.[0]?.status === 'approved' ? 'secondary' : 'outline'}
+                    className={product.product_verification_requests?.[0]?.status === 'approved' ? 'bg-green-100' : ''}
+                  >
                     {product.product_verification_requests?.[0]?.status || 'Pending Verification'}
                   </Badge>
                 </div>
