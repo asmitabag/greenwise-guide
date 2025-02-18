@@ -29,20 +29,10 @@ export const ProductCard = ({
   id,
 }: ProductCardProps) => {
   const [showScanner, setShowScanner] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const { toast } = useToast();
 
   const handleAddToCart = async () => {
-    const { data: session } = await supabase.auth.getSession();
-    
-    if (!session?.session?.user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to add items to your cart",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!id) {
       toast({
         title: "Error",
@@ -52,30 +42,43 @@ export const ProductCard = ({
       return;
     }
 
-    const { error } = await supabase
-      .from('cart_items')
-      .upsert({
-        product_id: id,
-        user_id: session.session.user.id,
-        quantity: 1
-      }, {
-        onConflict: 'product_id,user_id',
-        ignoreDuplicates: false
-      });
+    setIsAddingToCart(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to add items to your cart",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
+      const { error } = await supabase
+        .from('cart_items')
+        .upsert({
+          product_id: id,
+          user_id: session.user.id,
+          quantity: 1
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Added to cart",
+        description: `${title} has been added to your cart`,
+      });
+    } catch (error) {
+      console.error('Add to cart error:', error);
       toast({
         title: "Error",
         description: "Failed to add item to cart",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsAddingToCart(false);
     }
-
-    toast({
-      title: "Added to cart",
-      description: `${title} has been added to your cart`,
-    });
   };
 
   const handleScanComplete = () => {
@@ -147,9 +150,10 @@ export const ProductCard = ({
           <Button 
             onClick={handleAddToCart}
             className="bg-eco-primary text-white hover:bg-eco-accent"
+            disabled={isAddingToCart}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
+            {isAddingToCart ? "Adding..." : "Add to Cart"}
           </Button>
         </div>
       </div>

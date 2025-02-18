@@ -13,6 +13,7 @@ interface MaterialScannerProps {
 
 const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) => {
   const [isScanning, setIsScanning] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
@@ -45,28 +46,40 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   }, []);
 
   const captureAndAnalyze = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to scan materials",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!videoRef.current) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.drawImage(videoRef.current, 0, 0);
-    const imageData = canvas.toDataURL('image/jpeg');
+    setIsAnalyzing(true);
 
     try {
-      const { data: scanResult, error } = await supabase.functions.invoke('analyze-materials', {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error("Could not get canvas context");
+
+      ctx.drawImage(videoRef.current, 0, 0);
+      const imageData = canvas.toDataURL('image/jpeg');
+
+      const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
         body: { 
           image: imageData,
           productId: productId
         }
       });
 
-      if (error) throw error;
+      if (functionError) throw functionError;
 
-      // Store scan results
       const { error: dbError } = await supabase
         .from('material_scans')
         .insert({
@@ -74,7 +87,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           scan_data: imageData,
           confidence_score: scanResult.confidence,
           detected_materials: scanResult.materials,
-          user_id: (await supabase.auth.getSession()).data.session?.user.id
+          user_id: session.user.id
         });
 
       if (dbError) throw dbError;
@@ -87,11 +100,14 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       stopCamera();
       onScanComplete();
     } catch (error) {
+      console.error('Scan error:', error);
       toast({
         title: "Scan Failed",
         description: "Unable to analyze materials. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -120,12 +136,14 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
               <Button 
                 onClick={captureAndAnalyze}
                 className="flex-1 bg-eco-primary hover:bg-eco-accent"
+                disabled={isAnalyzing}
               >
-                Analyze Materials
+                {isAnalyzing ? "Analyzing..." : "Analyze Materials"}
               </Button>
               <Button 
                 onClick={stopCamera}
                 variant="outline"
+                disabled={isAnalyzing}
               >
                 Cancel
               </Button>
