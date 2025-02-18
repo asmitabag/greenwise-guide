@@ -114,6 +114,54 @@ export type Database = {
           },
         ]
       }
+      product_verification_requests: {
+        Row: {
+          id: string
+          product_id: string | null
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          seller_id: string | null
+          status: string | null
+          submitted_at: string
+          verification_data: Json | null
+        }
+        Insert: {
+          id?: string
+          product_id?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          seller_id?: string | null
+          status?: string | null
+          submitted_at?: string
+          verification_data?: Json | null
+        }
+        Update: {
+          id?: string
+          product_id?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          seller_id?: string | null
+          status?: string | null
+          submitted_at?: string
+          verification_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_verification_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_verification_requests_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string
@@ -126,6 +174,7 @@ export type Database = {
           image_url: string | null
           materials: string[] | null
           price: number
+          seller_id: string | null
           sustainability_score: number
           title: string
         }
@@ -140,6 +189,7 @@ export type Database = {
           image_url?: string | null
           materials?: string[] | null
           price: number
+          seller_id?: string | null
           sustainability_score: number
           title: string
         }
@@ -154,10 +204,19 @@ export type Database = {
           image_url?: string | null
           materials?: string[] | null
           price?: number
+          seller_id?: string | null
           sustainability_score?: number
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -217,6 +276,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seller_profiles: {
+        Row: {
+          business_address: string | null
+          business_description: string | null
+          business_name: string
+          contact_email: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          verification_documents: Json | null
+          verified: boolean | null
+        }
+        Insert: {
+          business_address?: string | null
+          business_description?: string | null
+          business_name: string
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string
+          id: string
+          verification_documents?: Json | null
+          verified?: boolean | null
+        }
+        Update: {
+          business_address?: string | null
+          business_description?: string | null
+          business_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          verification_documents?: Json | null
+          verified?: boolean | null
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -5,6 +5,8 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import Scanner from "./pages/Scanner";
+import SellerDashboard from "./pages/SellerDashboard";
+import SellerRegistration from "./pages/SellerRegistration";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -17,6 +19,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/scanner" element={<Scanner />} />
+        <Route path="/seller/dashboard" element={<SellerDashboard />} />
+        <Route path="/seller/register" element={<SellerRegistration />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
