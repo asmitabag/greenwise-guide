@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { Categories } from "@/components/Categories";
 import { motion } from "framer-motion";
-import { UserRound, ShoppingCart } from "lucide-react";
+import { UserRound, ShoppingCart, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +41,7 @@ const Index = () => {
   const { data: cartItemsCount = 0 } = useQuery({
     queryKey: ['cartItems'],
     queryFn: fetchCartItemsCount,
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 5000,
   });
 
   const filteredProducts = selectedCategory === "All Products"
@@ -69,6 +68,13 @@ const Index = () => {
     <div className="min-h-screen bg-eco-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-end mb-6 gap-4">
+          <Link 
+            to="/scanner" 
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-eco-primary text-white hover:bg-eco-primary/90 transition-colors"
+          >
+            <Camera size={20} />
+            <span>Scanner</span>
+          </Link>
           <Link 
             to="/cart" 
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-eco-primary text-white hover:bg-eco-primary/90 transition-colors relative"
