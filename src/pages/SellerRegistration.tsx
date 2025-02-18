@@ -33,16 +33,16 @@ const SellerRegistration = () => {
       const formData = new FormData(e.currentTarget);
       const sellerData = {
         id: session.user.id,
-        business_name: formData.get('business_name'),
-        business_description: formData.get('business_description'),
-        contact_email: formData.get('contact_email'),
-        contact_phone: formData.get('contact_phone'),
-        business_address: formData.get('business_address'),
+        business_name: String(formData.get('business_name')),
+        business_description: String(formData.get('business_description')),
+        contact_email: String(formData.get('contact_email')),
+        contact_phone: formData.get('contact_phone') ? String(formData.get('contact_phone')) : null,
+        business_address: String(formData.get('business_address')),
       };
 
       const { error } = await supabase
         .from('seller_profiles')
-        .insert([sellerData]);
+        .insert(sellerData);
 
       if (error) throw error;
 
