@@ -2,3 +2,5 @@
 project_id = "xubillqzhmicpubjzaqh"
 [functions.process-checkout]
 verify_jwt = true
+[functions.verify-product]
+verify_jwt = true

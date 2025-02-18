@@ -7,6 +7,7 @@ import Cart from "./pages/Cart";
 import Scanner from "./pages/Scanner";
 import SellerDashboard from "./pages/SellerDashboard";
 import SellerRegistration from "./pages/SellerRegistration";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/scanner" element={<Scanner />} />
         <Route path="/seller/dashboard" element={<SellerDashboard />} />
         <Route path="/seller/register" element={<SellerRegistration />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
