@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Leaf, Recycle, Droplets, ShoppingCart } from "lucide-react";
+import { Leaf, Recycle, Droplets, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MaterialAnalysis from "@/components/MaterialAnalysis";
@@ -16,6 +16,7 @@ interface ProductCardProps {
   sustainabilityScore: number;
   ecoFeatures: string[];
   id?: string;
+  brand: string;
 }
 
 export const ProductCard = ({
@@ -26,8 +27,10 @@ export const ProductCard = ({
   sustainabilityScore,
   ecoFeatures,
   id,
+  brand,
 }: ProductCardProps) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [showMaterials, setShowMaterials] = useState(false);
   const { toast } = useToast();
 
   const handleAddToCart = async () => {
@@ -94,7 +97,10 @@ export const ProductCard = ({
         </div>
       </div>
       <div className="p-4 space-y-4">
-        <h3 className="text-lg font-semibold text-eco-secondary">{title}</h3>
+        <div>
+          <h3 className="text-lg font-semibold text-eco-secondary">{title}</h3>
+          <p className="text-sm font-medium text-eco-accent">{brand}</p>
+        </div>
         <p className="text-sm text-gray-600">{description}</p>
         <div className="flex gap-2">
           {ecoFeatures.includes("organic") && (
@@ -117,7 +123,25 @@ export const ProductCard = ({
           )}
         </div>
         
-        {id && <MaterialAnalysis productId={id} />}
+        <Button 
+          variant="outline" 
+          className="w-full"
+          onClick={() => setShowMaterials(!showMaterials)}
+        >
+          {showMaterials ? (
+            <>
+              <ChevronUp className="w-4 h-4 mr-2" />
+              Hide Materials Analysis
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-4 h-4 mr-2" />
+              View Materials Analysis
+            </>
+          )}
+        </Button>
+        
+        {showMaterials && id && <MaterialAnalysis productId={id} />}
 
         <div className="flex justify-between items-center">
           <span className="text-lg font-bold text-eco-secondary">
