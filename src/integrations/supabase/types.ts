@@ -43,28 +43,43 @@ export type Database = {
       }
       material_analysis: {
         Row: {
+          biodegradability_rating: number | null
+          carbon_footprint: number | null
+          certification_ids: string[] | null
           created_at: string
           eco_score: number
           id: string
           impact_description: string
           material_name: string
           product_id: string | null
+          recyclability_rating: number | null
+          water_usage: number | null
         }
         Insert: {
+          biodegradability_rating?: number | null
+          carbon_footprint?: number | null
+          certification_ids?: string[] | null
           created_at?: string
           eco_score: number
           id?: string
           impact_description: string
           material_name: string
           product_id?: string | null
+          recyclability_rating?: number | null
+          water_usage?: number | null
         }
         Update: {
+          biodegradability_rating?: number | null
+          carbon_footprint?: number | null
+          certification_ids?: string[] | null
           created_at?: string
           eco_score?: number
           id?: string
           impact_description?: string
           material_name?: string
           product_id?: string | null
+          recyclability_rating?: number | null
+          water_usage?: number | null
         }
         Relationships: [
           {
@@ -75,6 +90,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      material_certifications: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          issuing_body: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          issuing_body: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          issuing_body?: string
+          name?: string
+        }
+        Relationships: []
       }
       material_scans: {
         Row: {
@@ -222,21 +261,36 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          eco_score: number | null
+          favorite_brands: string[] | null
           id: string
+          notification_settings: Json | null
+          preferences: Json | null
+          preferred_categories: string[] | null
           sustainability_points: number | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          eco_score?: number | null
+          favorite_brands?: string[] | null
           id: string
+          notification_settings?: Json | null
+          preferences?: Json | null
+          preferred_categories?: string[] | null
           sustainability_points?: number | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          eco_score?: number | null
+          favorite_brands?: string[] | null
           id?: string
+          notification_settings?: Json | null
+          preferences?: Json | null
+          preferred_categories?: string[] | null
           sustainability_points?: number | null
           username?: string | null
         }
