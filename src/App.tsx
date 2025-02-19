@@ -16,7 +16,7 @@ import { Toaster } from "@/components/ui/toaster";
 function App() {
   return (
     <Router>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <main className="flex-1">

@@ -19,7 +19,7 @@ export function AppSidebar() {
   return (
     <>
       <SidebarTrigger className="fixed top-4 left-4 z-50" />
-      <Sidebar defaultOpen={false}>
+      <Sidebar>
         <SidebarHeader className="border-b border-border px-6 py-4">
           <h2 className="text-lg font-semibold">EcoScanner</h2>
         </SidebarHeader>
