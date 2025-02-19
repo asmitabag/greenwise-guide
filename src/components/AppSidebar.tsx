@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
-import { UserCircle, Users, HeadsetMic, ShoppingCart, Store } from "lucide-react";
+import { UserCircle, Users, Headset, ShoppingCart, Store } from "lucide-react";
 
 export function AppSidebar() {
   return (
@@ -63,7 +63,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to="/support">
-                    <HeadsetMic />
+                    <Headset />
                     <span>Customer Care</span>
                   </Link>
                 </SidebarMenuButton>
