@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { Categories } from "@/components/Categories";
-import { motion } from "framer-motion";
 import { UserRound, ShoppingCart, Camera, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -56,36 +54,13 @@ const Index = () => {
     ? products
     : products.filter(product => product.category === selectedCategory);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-eco-background flex items-center justify-center">
-        <p className="text-lg text-gray-600">Loading products...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-eco-background flex items-center justify-center">
-        <p className="text-lg text-red-600">Error loading products. Please try again later.</p>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="min-h-screen bg-eco-background flex items-center justify-center"><p className="text-lg text-gray-600">Loading products...</p></div>;
+  if (error) return <div className="min-h-screen bg-eco-background flex items-center justify-center"><p className="text-lg text-red-600">Error loading products. Please try again later.</p></div>;
 
   return (
     <div className="min-h-screen bg-eco-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative w-1/3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full"
-            />
-          </div>
+        <div className="flex justify-end items-center mb-6">
           <div className="flex gap-4">
             <Link 
               to="/scanner" 
@@ -119,7 +94,7 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="text-center mb-12 animate-fade-in">
+        <div className="text-center mb-8 animate-fade-in">
           <span className="inline-block px-4 py-1 bg-eco-muted text-eco-primary rounded-full text-sm font-medium mb-4">
             Sustainable Shopping Made Simple
           </span>
@@ -135,6 +110,17 @@ const Index = () => {
           selected={selectedCategory}
           onSelect={setSelectedCategory}
         />
+
+        <div className="relative w-full max-w-xl mx-auto mb-8">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 w-full"
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
