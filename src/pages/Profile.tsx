@@ -10,20 +10,31 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import type { User } from '@supabase/supabase-js';
 
+interface NotificationSettings {
+  email_notifications: boolean;
+  product_updates: boolean;
+  sustainability_tips: boolean;
+}
+
+interface UserPreferences {
+  preferred_categories: string[];
+  favorite_brands: string[];
+}
+
 const Profile = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [sustainabilityPoints, setSustainabilityPoints] = useState(0);
-  const [notifications, setNotifications] = useState({
+  const [notifications, setNotifications] = useState<NotificationSettings>({
     email_notifications: true,
     product_updates: true,
     sustainability_tips: true,
   });
-  const [preferences, setPreferences] = useState({
-    preferred_categories: [] as string[],
-    favorite_brands: [] as string[],
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    preferred_categories: [],
+    favorite_brands: [],
   });
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -56,11 +67,17 @@ const Profile = () => {
         setUsername(data.username || '');
         setAvatarUrl(data.avatar_url || '');
         setSustainabilityPoints(data.sustainability_points || 0);
-        setNotifications(data.notification_settings || {
+        // Ensure the notification settings conform to the expected type
+        const defaultNotifications: NotificationSettings = {
           email_notifications: true,
           product_updates: true,
           sustainability_tips: true,
+        };
+        setNotifications({
+          ...defaultNotifications,
+          ...(data.notification_settings as NotificationSettings),
         });
+        // Ensure preferences conform to the expected type
         setPreferences({
           preferred_categories: data.preferred_categories || [],
           favorite_brands: data.favorite_brands || [],
