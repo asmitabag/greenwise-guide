@@ -1,5 +1,5 @@
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +14,7 @@ interface MaterialScannerProps {
 const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
@@ -28,6 +29,8 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         streamRef.current = stream;
       }
       setIsScanning(true);
+      // Reset captured image when starting a new scan
+      setCapturedImage(null);
     } catch (error) {
       toast({
         title: "Camera Error",
@@ -44,6 +47,13 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     }
     setIsScanning(false);
   }, []);
+
+  // Cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
 
   const captureAndAnalyze = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -70,6 +80,9 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
 
       ctx.drawImage(videoRef.current, 0, 0);
       const imageData = canvas.toDataURL('image/jpeg');
+      
+      // Save the captured image for preview
+      setCapturedImage(imageData);
 
       const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
         body: { 
@@ -114,7 +127,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        {!isScanning ? (
+        {!isScanning && !capturedImage ? (
           <Button 
             onClick={startCamera}
             className="w-full bg-eco-primary hover:bg-eco-accent"
@@ -125,28 +138,67 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         ) : (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                className="w-full"
-              />
+              {capturedImage ? (
+                <div className="relative">
+                  <img 
+                    src={capturedImage} 
+                    alt="Captured material scan" 
+                    className="w-full rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                    <div className="bg-white p-3 rounded-lg shadow-lg">
+                      <p className="text-sm font-medium">
+                        {isAnalyzing ? "Analyzing materials..." : "Scan captured"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full"
+                />
+              )}
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={captureAndAnalyze}
-                className="flex-1 bg-eco-primary hover:bg-eco-accent"
-                disabled={isAnalyzing}
-              >
-                {isAnalyzing ? "Analyzing..." : "Analyze Materials"}
-              </Button>
-              <Button 
-                onClick={stopCamera}
-                variant="outline"
-                disabled={isAnalyzing}
-              >
-                Cancel
-              </Button>
+              {!capturedImage ? (
+                <>
+                  <Button 
+                    onClick={captureAndAnalyze}
+                    className="flex-1 bg-eco-primary hover:bg-eco-accent"
+                    disabled={isAnalyzing}
+                  >
+                    {isAnalyzing ? "Analyzing..." : "Capture & Analyze"}
+                  </Button>
+                  <Button 
+                    onClick={stopCamera}
+                    variant="outline"
+                    disabled={isAnalyzing}
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    onClick={startCamera}
+                    className="flex-1"
+                    variant="outline"
+                    disabled={isAnalyzing}
+                  >
+                    New Scan
+                  </Button>
+                  <Button 
+                    onClick={onScanComplete}
+                    variant="outline"
+                    disabled={isAnalyzing}
+                  >
+                    Done
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

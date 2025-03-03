@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Droplets, Recycle, Timer, Leaf } from "lucide-react";
+import { Droplets, Recycle, Timer, Leaf, AlertCircle } from "lucide-react";
 
 interface MaterialAnalysisProps {
   productId: string;
@@ -20,6 +20,7 @@ interface MaterialAnalysis {
   recyclability_rating: number;
   biodegradability_rating: number;
   certification_ids: string[];
+  product_id: string;
 }
 
 interface Certification {
@@ -30,7 +31,7 @@ interface Certification {
 }
 
 const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
-  const { data: materials = [], isLoading: materialsLoading } = useQuery({
+  const { data: materials = [], isLoading: materialsLoading, error: materialsError } = useQuery({
     queryKey: ['material-analysis', productId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -59,8 +60,29 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
     return <div className="animate-pulse bg-gray-200 h-20 rounded-lg"></div>;
   }
 
-  if (!materials.length) {
-    return null;
+  if (materialsError) {
+    return (
+      <Card className="p-4 bg-red-50">
+        <div className="flex items-center gap-2 text-red-600">
+          <AlertCircle size={20} />
+          <p>Error loading material data. Please try again.</p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!materials || materials.length === 0) {
+    return (
+      <Card className="p-6">
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <Leaf className="h-12 w-12 text-gray-400 mb-2" />
+          <h3 className="text-lg font-medium text-gray-900">No material data available</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            This product hasn't been analyzed yet or no material data is available.
+          </p>
+        </div>
+      </Card>
+    );
   }
 
   return (
