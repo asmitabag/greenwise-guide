@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
@@ -33,7 +34,12 @@ async function fetchProducts(searchTerm = '') {
         sustainability_score: 9,
         eco_features: ["recyclable", "energy-efficient", "solar-powered"],
         brand: "EcoCharge",
-        category: "Electronics"
+        category: "Electronics",
+        // Adding the missing required properties:
+        carbon_footprint: 5.2,
+        created_at: new Date().toISOString(),
+        materials: ["recycled plastic", "silicon solar panels", "lithium-ion battery"],
+        seller_id: null
       });
     }
   }
