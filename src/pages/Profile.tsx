@@ -9,6 +9,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import type { User } from '@supabase/supabase-js';
+import type { Json } from '@/integrations/supabase/types';
 
 interface NotificationSettings {
   email_notifications: boolean;
@@ -67,17 +68,28 @@ const Profile = () => {
         setUsername(data.username || '');
         setAvatarUrl(data.avatar_url || '');
         setSustainabilityPoints(data.sustainability_points || 0);
-        // Ensure the notification settings conform to the expected type
+        
+        // Handle notification settings with proper type casting
         const defaultNotifications: NotificationSettings = {
           email_notifications: true,
           product_updates: true,
           sustainability_tips: true,
         };
-        setNotifications({
-          ...defaultNotifications,
-          ...(data.notification_settings as NotificationSettings),
-        });
-        // Ensure preferences conform to the expected type
+        
+        // Parse the notification settings from JSON if it exists
+        const notificationData = data.notification_settings as Json;
+        if (notificationData && typeof notificationData === 'object' && !Array.isArray(notificationData)) {
+          setNotifications({
+            ...defaultNotifications,
+            email_notifications: Boolean(notificationData.email_notifications ?? true),
+            product_updates: Boolean(notificationData.product_updates ?? true),
+            sustainability_tips: Boolean(notificationData.sustainability_tips ?? true),
+          });
+        } else {
+          setNotifications(defaultNotifications);
+        }
+        
+        // Set preferences with proper defaults
         setPreferences({
           preferred_categories: data.preferred_categories || [],
           favorite_brands: data.favorite_brands || [],
@@ -99,13 +111,29 @@ const Profile = () => {
 
     try {
       setLoading(true);
+      
+      // Convert notification settings to a JSON-compatible object
+      const notificationSettingsJson: Record<string, boolean> = {
+        email_notifications: notifications.email_notifications,
+        product_updates: notifications.product_updates,
+        sustainability_tips: notifications.sustainability_tips,
+      };
+      
+      // Convert preferences to a JSON-compatible object
+      const preferencesJson = {
+        preferred_categories: preferences.preferred_categories,
+        favorite_brands: preferences.favorite_brands,
+      };
+      
       const { error } = await supabase
         .from('profiles')
         .update({
           username,
           avatar_url: avatarUrl,
-          notification_settings: notifications,
-          preferences: preferences,
+          notification_settings: notificationSettingsJson,
+          preferences: preferencesJson,
+          preferred_categories: preferences.preferred_categories,
+          favorite_brands: preferences.favorite_brands,
         })
         .eq('id', user.id);
 
