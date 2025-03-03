@@ -29,7 +29,7 @@ async function fetchProducts(searchTerm = '') {
         id: "solar-power-bank-001",
         title: "EcoCharge Solar Power Bank",
         description: "Portable 20000mAh solar power bank with fast charging capabilities. Perfect for outdoor activities and emergencies.",
-        image_url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+        image_url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
         price: 49.99,
         sustainability_score: 9,
         eco_features: ["recyclable", "energy-efficient", "solar-powered"],
