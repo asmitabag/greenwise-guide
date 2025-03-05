@@ -62,7 +62,8 @@ function analyzeMaterials(imageData: string) {
       "Look for 100% organic cotton or recycled materials for better sustainability",
       "Avoid products with more than 30% synthetic materials",
       "Check for certifications like GOTS or OEKO-TEX"
-    ]
+    ],
+    success: true
   };
 }
 
@@ -83,7 +84,7 @@ serve(async (req) => {
     } catch (parseError) {
       console.error("Error parsing request body:", parseError);
       return new Response(
-        JSON.stringify({ error: 'Invalid request body - could not parse JSON' }),
+        JSON.stringify({ error: 'Invalid request body - could not parse JSON', success: false }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -96,7 +97,7 @@ serve(async (req) => {
     if (!image || !productId) {
       console.error("Missing required parameters");
       return new Response(
-        JSON.stringify({ error: 'Image and productId are required' }),
+        JSON.stringify({ error: 'Image and productId are required', success: false }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -119,7 +120,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, success: false }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500

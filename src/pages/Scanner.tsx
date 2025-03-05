@@ -27,7 +27,7 @@ const Scanner = () => {
     <div className="min-h-screen bg-eco-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="scanner">Scanner</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="impact">Impact</TabsTrigger>

@@ -1,5 +1,5 @@
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Camera, Aperture, AlertCircle, Upload, Redo } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,21 +16,39 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   const [isScanning, setIsScanning] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [scanSuccess, setScanSuccess] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
+  // Cleanup camera resources when component unmounts
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
   const startCamera = async () => {
     try {
+      console.log("Starting camera...");
       setCameraError(null);
       setIsAnalyzing(false);
+      setScanSuccess(false);
       
-      // First try to access the environment/back camera on mobile
-      const constraints = {
+      if (streamRef.current) {
+        // Stop any existing stream
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      
+      // Try to access the environment/back camera on mobile
+      let constraints: MediaStreamConstraints = {
         video: {
           facingMode: isMobile ? "environment" : "user",
           width: { ideal: 1280 },
@@ -38,23 +56,26 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         }
       };
       
-      console.log("Requesting camera with constraints:", constraints);
+      console.log("Requesting camera with constraints:", JSON.stringify(constraints));
       
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           streamRef.current = stream;
           setIsScanning(true);
           setCapturedImage(null);
+          setUploadedFile(null);
           
-          // Ensure the video is set to play once loaded
+          // Play the video once loaded
           videoRef.current.onloadedmetadata = () => {
-            console.log("Video metadata loaded");
-            videoRef.current?.play().catch(e => {
-              console.error("Error playing video:", e);
-              setCameraError("Failed to play video stream. Please try again.");
-            });
+            if (videoRef.current) {
+              videoRef.current.play().catch(e => {
+                console.error("Error playing video:", e);
+                setCameraError("Failed to play video stream. Please try again.");
+              });
+            }
           };
           
           console.log("Camera stream acquired successfully");
@@ -74,115 +95,114 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
             streamRef.current = fallbackStream;
             setIsScanning(true);
             setCapturedImage(null);
+            setUploadedFile(null);
             
             videoRef.current.onloadedmetadata = () => {
-              console.log("Fallback video metadata loaded");
-              videoRef.current?.play().catch(e => {
-                console.error("Error playing fallback video:", e);
-                setCameraError("Failed to play video stream. Please try again.");
-              });
+              if (videoRef.current) {
+                videoRef.current.play().catch(e => {
+                  console.error("Error playing fallback video:", e);
+                  setCameraError("Failed to play video stream. Please try again.");
+                });
+              }
             };
             
             console.log("Fallback camera stream acquired successfully");
           }
         } catch (fallbackError) {
           console.error("Fallback camera access error:", fallbackError);
-          setCameraError("Unable to access any camera. Please check your camera permissions and try again.");
+          setCameraError("Unable to access camera. Please check camera permissions.");
           toast({
             title: "Camera Access Failed",
-            description: "Unable to access any camera. Please check camera permissions in your browser settings.",
+            description: "Unable to access camera. Please check camera permissions.",
             variant: "destructive",
           });
         }
       }
     } catch (error) {
-      console.error("General camera access error:", error);
-      setCameraError("Unable to access camera. Please ensure you've granted camera permissions.");
+      console.error("General camera error:", error);
+      setCameraError("Unable to access camera. Please check permissions.");
       toast({
         title: "Camera Error",
-        description: "Unable to access camera. Please ensure you've granted camera permissions.",
+        description: "Unable to access camera. Please check permissions.",
         variant: "destructive",
       });
     }
   };
 
-  const stopCamera = useCallback(() => {
+  const stopCamera = () => {
     console.log("Stopping camera");
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => {
-        console.log("Stopping track:", track.kind);
-        track.stop();
-      });
+      streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    setIsScanning(false);
-  }, []);
-
-  // Cleanup when component unmounts
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, [stopCamera]);
-
-  const captureAndAnalyze = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to scan materials",
-        variant: "destructive",
-      });
-      return;
-    }
+    setIsScanning(false);
+  };
 
+  const captureImage = () => {
     if (!videoRef.current) {
       console.error("Video reference is null");
-      return;
+      return null;
     }
 
-    setIsAnalyzing(true);
-
     try {
+      // Create canvas if it doesn't exist
       if (!canvasRef.current) {
-        const canvas = document.createElement('canvas');
-        canvasRef.current = canvas;
+        canvasRef.current = document.createElement('canvas');
       }
       
-      // Make sure we set canvas dimensions based on the video
-      const videoWidth = videoRef.current.videoWidth;
-      const videoHeight = videoRef.current.videoHeight;
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
       
-      console.log("Capturing frame, video dimensions:", videoWidth, "x", videoHeight);
+      // Set canvas size to match video dimensions
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       
-      if (videoWidth === 0 || videoHeight === 0) {
-        throw new Error("Video stream dimensions are not available");
+      console.log("Capturing image with dimensions:", canvas.width, "x", canvas.height);
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error("Could not get canvas context");
       }
       
-      canvasRef.current.width = videoWidth;
-      canvasRef.current.height = videoHeight;
+      // Draw the current video frame to the canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      const ctx = canvasRef.current.getContext('2d');
-      if (!ctx) throw new Error("Could not get canvas context");
-
-      ctx.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
-      
-      const imageData = canvasRef.current.toDataURL('image/jpeg', 0.8);
-      
-      // Save the captured image for preview
-      setCapturedImage(imageData);
+      // Convert canvas to data URL
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
       console.log("Image captured successfully");
       
-      // Stop the camera after capture
-      stopCamera();
-      
-      // Simulate loading for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      return imageData;
+    } catch (error) {
+      console.error("Error capturing image:", error);
+      toast({
+        title: "Capture Failed",
+        description: "Failed to capture image. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
 
+  const analyzeImage = async (imageData: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to scan materials",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      setIsAnalyzing(true);
+      
       console.log("Sending image to analyze-materials function");
       const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
         body: { 
@@ -197,6 +217,10 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       }
 
       console.log("Scan result:", scanResult);
+      
+      if (!scanResult.success) {
+        throw new Error("Analysis failed");
+      }
 
       const { error: dbError } = await supabase
         .from('material_scans')
@@ -204,7 +228,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           product_id: productId,
           scan_data: imageData,
           confidence_score: scanResult?.confidence || 0.8,
-          detected_materials: scanResult?.materials || ["cotton", "polyester"],
+          detected_materials: scanResult?.materials?.map(m => m.name) || ["cotton", "polyester"],
           user_id: session.user.id
         });
 
@@ -217,17 +241,32 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         title: "Scan Complete",
         description: "Materials analysis has been updated.",
       });
-
+      
+      setScanSuccess(true);
       setIsAnalyzing(false);
+      return true;
     } catch (error) {
-      console.error('Scan error:', error);
+      console.error('Analysis error:', error);
       toast({
-        title: "Scan Failed",
+        title: "Analysis Failed",
         description: "Unable to analyze materials. Please try again.",
         variant: "destructive",
       });
       setIsAnalyzing(false);
+      return false;
     }
+  };
+
+  const captureAndAnalyze = async () => {
+    // Stop camera after capturing
+    const imageData = captureImage();
+    if (!imageData) return;
+    
+    setCapturedImage(imageData);
+    stopCamera();
+    
+    // Analyze the captured image
+    await analyzeImage(imageData);
   };
 
   const openFileUpload = () => {
@@ -241,90 +280,48 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     if (!file) return;
 
     console.log("File selected:", file.name, file.type, file.size);
-
-    const { data: { session } } = await supabase.auth.getSession();
+    setUploadedFile(file);
     
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to scan materials",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsAnalyzing(true);
-
     try {
       // Convert file to base64
       const reader = new FileReader();
       reader.onloadend = async () => {
         const imageData = reader.result as string;
-        console.log("File converted to base64, length:", imageData.length);
+        console.log("File converted to base64");
         setCapturedImage(imageData);
-        
-        // Simulate loading for demonstration
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        console.log("Sending uploaded image to analyze-materials function");
-        const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
-          body: { 
-            image: imageData,
-            productId: productId
-          }
-        });
-
-        if (functionError) {
-          console.error("Function error:", functionError);
-          throw functionError;
-        }
-
-        console.log("Scan result from uploaded image:", scanResult);
-
-        const { error: dbError } = await supabase
-          .from('material_scans')
-          .insert({
-            product_id: productId,
-            scan_data: imageData,
-            confidence_score: scanResult?.confidence || 0.8,
-            detected_materials: scanResult?.materials || ["cotton", "polyester"],
-            user_id: session.user.id
-          });
-
-        if (dbError) {
-          console.error("Database error:", dbError);
-          throw dbError;
-        }
-
-        toast({
-          title: "Scan Complete",
-          description: "Materials analysis has been updated.",
-        });
-        
-        setIsAnalyzing(false);
+        await analyzeImage(imageData);
       };
       
       reader.onerror = (error) => {
         console.error("FileReader error:", error);
-        throw new Error("Error reading file");
+        toast({
+          title: "Upload Failed",
+          description: "Error reading file. Please try another file.",
+          variant: "destructive",
+        });
       };
       
       reader.readAsDataURL(file);
     } catch (error) {
       console.error('File upload error:', error);
       toast({
-        title: "Scan Failed",
-        description: "Unable to analyze materials. Please try again.",
+        title: "Upload Failed",
+        description: "Unable to process file. Please try again.",
         variant: "destructive",
       });
-      setIsAnalyzing(false);
     }
   };
 
   const handleNewScan = () => {
     setCapturedImage(null);
+    setUploadedFile(null);
     setIsScanning(false);
     setIsAnalyzing(false);
+    setScanSuccess(false);
+  };
+
+  const viewResults = () => {
+    onScanComplete(productId);
   };
 
   return (
@@ -382,26 +379,22 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden bg-black flex justify-center">
               {capturedImage ? (
-                <div className="relative">
+                <div className="relative max-h-[50vh] w-full">
                   <img 
                     src={capturedImage} 
                     alt="Captured material scan" 
-                    className="max-h-[50vh] rounded-lg"
+                    className="object-contain w-full h-full max-h-[50vh]"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                    <div className="bg-white p-3 rounded-lg shadow-lg">
-                      <div className="flex items-center gap-2">
-                        {isAnalyzing ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-eco-primary"></div>
-                            <p className="text-sm font-medium">Analyzing materials...</p>
-                          </>
-                        ) : (
-                          <p className="text-sm font-medium">Scan captured</p>
-                        )}
+                  {isAnalyzing && (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                      <div className="bg-white p-3 rounded-lg shadow-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-eco-primary"></div>
+                          <p className="text-sm font-medium">Analyzing materials...</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <video
@@ -409,10 +402,11 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                   autoPlay
                   playsInline
                   muted
-                  className="max-h-[50vh] rounded-lg"
+                  className="w-full max-h-[50vh] object-cover"
                 />
               )}
             </div>
+            
             <div className="flex gap-2">
               {!capturedImage ? (
                 <>
@@ -443,17 +437,34 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                     <Redo className="w-4 h-4 mr-2" />
                     New Scan
                   </Button>
-                  <Button 
-                    onClick={() => onScanComplete(productId)}
-                    variant={isAnalyzing ? "outline" : "default"}
-                    disabled={isAnalyzing}
-                    className={isAnalyzing ? "" : "bg-eco-primary"}
-                  >
-                    {isAnalyzing ? "Processing..." : "View Results"}
-                  </Button>
+                  {scanSuccess && (
+                    <Button 
+                      onClick={viewResults}
+                      variant="default"
+                      className="bg-eco-primary"
+                    >
+                      View Results
+                    </Button>
+                  )}
                 </>
               )}
             </div>
+            
+            {uploadedFile && !isAnalyzing && !scanSuccess && (
+              <div className="text-center py-2">
+                <p className="text-sm text-gray-500">
+                  Analyzing {uploadedFile.name}... This may take a moment.
+                </p>
+              </div>
+            )}
+            
+            {scanSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                <p className="text-sm text-green-700 text-center">
+                  Analysis complete! Click "View Results" to see the detailed breakdown.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
