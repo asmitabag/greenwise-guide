@@ -12,6 +12,14 @@ interface ScannerViewProps {
 const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [showScanner, setShowScanner] = useState(false);
 
+  const handleScanComplete = (productId?: string) => {
+    if (productId) {
+      onScanComplete(productId);
+    } else {
+      setShowScanner(false);
+    }
+  };
+
   return (
     <Card className="p-6">
       <CardHeader className="px-0 pt-0">
@@ -44,7 +52,7 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
         ) : (
           <MaterialScanner 
             productId="external-scan" 
-            onScanComplete={onScanComplete}
+            onScanComplete={handleScanComplete}
           />
         )}
       </CardContent>
