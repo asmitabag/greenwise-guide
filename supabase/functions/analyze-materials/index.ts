@@ -10,31 +10,88 @@ const corsHeaders = {
 function analyzeMaterials(imageData: string) {
   // This is a mock implementation
   // In a real app, you'd use a computer vision API to analyze the image
-  console.log("Analyzing materials from image...");
+  console.log("Analyzing materials from image data of length:", imageData.length);
   
-  const mockMaterials = [
-    { name: "Cotton", percentage: 60, eco_score: 8 },
-    { name: "Polyester", percentage: 40, eco_score: 4 }
+  // Create a more detailed and realistic analysis result
+  // In a production app, this would use ML to actually analyze the image
+  const materials = [
+    { name: "Cotton", percentage: 60, eco_score: 8, sustainable: true, 
+      details: "Organic cotton uses less water and no pesticides compared to conventional cotton." },
+    { name: "Polyester", percentage: 40, eco_score: 4, sustainable: false, 
+      details: "Synthetic material derived from petroleum, not biodegradable." }
   ];
 
+  // Randomize the percentages slightly to make it look more realistic
+  const randomizePercentage = (basePercentage: number) => {
+    const variance = Math.floor(Math.random() * 5) - 2; // -2 to +2
+    return Math.max(5, Math.min(95, basePercentage + variance));
+  };
+
+  const randomizedMaterials = materials.map(material => ({
+    ...material,
+    percentage: randomizePercentage(material.percentage)
+  }));
+  
+  // Adjust percentages to ensure they sum to 100%
+  const sum = randomizedMaterials.reduce((acc, mat) => acc + mat.percentage, 0);
+  randomizedMaterials[0].percentage += (100 - sum);
+  
   // Add random variance to make it look more realistic
   const confidence = 0.75 + (Math.random() * 0.2);
   
+  // Calculate overall eco_score based on material percentages
+  const overallEcoScore = randomizedMaterials.reduce(
+    (score, material) => score + (material.eco_score * material.percentage / 100), 
+    0
+  ).toFixed(1);
+  
+  // Add water and energy metrics
+  const waterSaved = Math.floor(500 + Math.random() * 1000); // ml
+  const energySaved = Math.floor(20 + Math.random() * 30); // %
+  
   return {
-    materials: mockMaterials,
-    confidence: confidence
+    materials: randomizedMaterials,
+    confidence: confidence,
+    eco_score: parseFloat(overallEcoScore),
+    metrics: {
+      water_saved: waterSaved,
+      energy_efficiency: energySaved,
+      biodegradable_percentage: randomizedMaterials[0].percentage // assume cotton is biodegradable
+    },
+    recommendations: [
+      "Look for 100% organic cotton or recycled materials for better sustainability",
+      "Avoid products with more than 30% synthetic materials",
+      "Check for certifications like GOTS or OEKO-TEX"
+    ]
   };
 }
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling OPTIONS request");
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     console.log("Received request to analyze materials");
-    const { image, productId } = await req.json()
+    
+    // Get request body
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body - could not parse JSON' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    const { image, productId } = requestBody;
 
     if (!image || !productId) {
       console.error("Missing required parameters");
@@ -44,7 +101,7 @@ serve(async (req) => {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
-      )
+      );
     }
 
     // Analyze materials in the image
@@ -58,7 +115,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
       },
-    )
+    );
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(
@@ -67,6 +124,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
       },
-    )
+    );
   }
-})
+});

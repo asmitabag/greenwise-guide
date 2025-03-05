@@ -27,11 +27,18 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   const startCamera = async () => {
     try {
       setCameraError(null);
+      setIsAnalyzing(false);
+      
+      // First try to access the environment/back camera on mobile
       const constraints = {
-        video: isMobile 
-          ? { facingMode: { exact: "environment" } } 
-          : { facingMode: "user" }
+        video: {
+          facingMode: isMobile ? "environment" : "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
       };
+      
+      console.log("Requesting camera with constraints:", constraints);
       
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -40,22 +47,56 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           streamRef.current = stream;
           setIsScanning(true);
           setCapturedImage(null);
+          
+          // Ensure the video is set to play once loaded
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Video metadata loaded");
+            videoRef.current?.play().catch(e => {
+              console.error("Error playing video:", e);
+              setCameraError("Failed to play video stream. Please try again.");
+            });
+          };
+          
+          console.log("Camera stream acquired successfully");
         }
       } catch (mobileError) {
-        // Fallback to any camera if environment camera fails
-        console.log("Couldn't access environment camera, falling back:", mobileError);
-        const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true 
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = fallbackStream;
-          streamRef.current = fallbackStream;
-          setIsScanning(true);
-          setCapturedImage(null);
+        console.error("Initial camera access error:", mobileError);
+        
+        // Fallback to any available camera
+        console.log("Falling back to any camera");
+        try {
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true 
+          });
+          
+          if (videoRef.current) {
+            videoRef.current.srcObject = fallbackStream;
+            streamRef.current = fallbackStream;
+            setIsScanning(true);
+            setCapturedImage(null);
+            
+            videoRef.current.onloadedmetadata = () => {
+              console.log("Fallback video metadata loaded");
+              videoRef.current?.play().catch(e => {
+                console.error("Error playing fallback video:", e);
+                setCameraError("Failed to play video stream. Please try again.");
+              });
+            };
+            
+            console.log("Fallback camera stream acquired successfully");
+          }
+        } catch (fallbackError) {
+          console.error("Fallback camera access error:", fallbackError);
+          setCameraError("Unable to access any camera. Please check your camera permissions and try again.");
+          toast({
+            title: "Camera Access Failed",
+            description: "Unable to access any camera. Please check camera permissions in your browser settings.",
+            variant: "destructive",
+          });
         }
       }
     } catch (error) {
-      console.error("Camera access error:", error);
+      console.error("General camera access error:", error);
       setCameraError("Unable to access camera. Please ensure you've granted camera permissions.");
       toast({
         title: "Camera Error",
@@ -66,9 +107,16 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   };
 
   const stopCamera = useCallback(() => {
+    console.log("Stopping camera");
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach(track => {
+        console.log("Stopping track:", track.kind);
+        track.stop();
+      });
       streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     setIsScanning(false);
   }, []);
@@ -92,33 +140,50 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       return;
     }
 
-    if (!videoRef.current) return;
+    if (!videoRef.current) {
+      console.error("Video reference is null");
+      return;
+    }
 
     setIsAnalyzing(true);
 
     try {
       if (!canvasRef.current) {
         const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
         canvasRef.current = canvas;
       }
+      
+      // Make sure we set canvas dimensions based on the video
+      const videoWidth = videoRef.current.videoWidth;
+      const videoHeight = videoRef.current.videoHeight;
+      
+      console.log("Capturing frame, video dimensions:", videoWidth, "x", videoHeight);
+      
+      if (videoWidth === 0 || videoHeight === 0) {
+        throw new Error("Video stream dimensions are not available");
+      }
+      
+      canvasRef.current.width = videoWidth;
+      canvasRef.current.height = videoHeight;
       
       const ctx = canvasRef.current.getContext('2d');
       if (!ctx) throw new Error("Could not get canvas context");
 
-      canvasRef.current.width = videoRef.current.videoWidth;
-      canvasRef.current.height = videoRef.current.videoHeight;
-      ctx.drawImage(videoRef.current, 0, 0);
+      ctx.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
       
       const imageData = canvasRef.current.toDataURL('image/jpeg', 0.8);
       
       // Save the captured image for preview
       setCapturedImage(imageData);
+      console.log("Image captured successfully");
+      
+      // Stop the camera after capture
+      stopCamera();
       
       // Simulate loading for demonstration
       await new Promise(resolve => setTimeout(resolve, 1500));
 
+      console.log("Sending image to analyze-materials function");
       const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
         body: { 
           image: imageData,
@@ -126,7 +191,10 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         }
       });
 
-      if (functionError) throw functionError;
+      if (functionError) {
+        console.error("Function error:", functionError);
+        throw functionError;
+      }
 
       console.log("Scan result:", scanResult);
 
@@ -140,15 +208,17 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           user_id: session.user.id
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error("Database error:", dbError);
+        throw dbError;
+      }
 
       toast({
         title: "Scan Complete",
         description: "Materials analysis has been updated.",
       });
 
-      stopCamera();
-      onScanComplete(productId);
+      setIsAnalyzing(false);
     } catch (error) {
       console.error('Scan error:', error);
       toast({
@@ -170,6 +240,8 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log("File selected:", file.name, file.type, file.size);
+
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session?.user) {
@@ -188,11 +260,13 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       const reader = new FileReader();
       reader.onloadend = async () => {
         const imageData = reader.result as string;
+        console.log("File converted to base64, length:", imageData.length);
         setCapturedImage(imageData);
         
         // Simulate loading for demonstration
         await new Promise(resolve => setTimeout(resolve, 1500));
 
+        console.log("Sending uploaded image to analyze-materials function");
         const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
           body: { 
             image: imageData,
@@ -200,9 +274,12 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           }
         });
 
-        if (functionError) throw functionError;
+        if (functionError) {
+          console.error("Function error:", functionError);
+          throw functionError;
+        }
 
-        console.log("Scan result:", scanResult);
+        console.log("Scan result from uploaded image:", scanResult);
 
         const { error: dbError } = await supabase
           .from('material_scans')
@@ -214,7 +291,10 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
             user_id: session.user.id
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error("Database error:", dbError);
+          throw dbError;
+        }
 
         toast({
           title: "Scan Complete",
@@ -222,10 +302,10 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         });
         
         setIsAnalyzing(false);
-        onScanComplete(productId);
       };
       
-      reader.onerror = () => {
+      reader.onerror = (error) => {
+        console.error("FileReader error:", error);
         throw new Error("Error reading file");
       };
       
@@ -239,6 +319,12 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       });
       setIsAnalyzing(false);
     }
+  };
+
+  const handleNewScan = () => {
+    setCapturedImage(null);
+    setIsScanning(false);
+    setIsAnalyzing(false);
   };
 
   return (
@@ -322,6 +408,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                   ref={videoRef}
                   autoPlay
                   playsInline
+                  muted
                   className="max-h-[50vh] rounded-lg"
                 />
               )}
@@ -348,7 +435,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
               ) : (
                 <>
                   <Button 
-                    onClick={isScanning ? startCamera : openFileUpload}
+                    onClick={handleNewScan}
                     className="flex-1"
                     variant="outline"
                     disabled={isAnalyzing}
