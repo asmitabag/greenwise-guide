@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,7 +98,11 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
                 </Badge>
               </div>
               
-              <Progress value={material.eco_score * 10} className="h-2" />
+              <Progress 
+                value={material.eco_score * 10} 
+                className="h-2" 
+                indicatorClassName={material.eco_score > 7 ? 'bg-green-500' : material.eco_score > 4 ? 'bg-amber-500' : 'bg-red-500'} 
+              />
               
               <p className="text-sm text-gray-600">{material.impact_description}</p>
               
@@ -124,7 +127,11 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
                   <Recycle className="text-eco-primary" />
                   <div>
                     <p className="text-sm font-medium">Recyclability</p>
-                    <Progress value={material.recyclability_rating * 10} className="h-2 mt-1" />
+                    <Progress 
+                      value={material.recyclability_rating * 10} 
+                      className="h-2 mt-1" 
+                      indicatorClassName={material.recyclability_rating > 7 ? 'bg-green-500' : material.recyclability_rating > 4 ? 'bg-amber-500' : 'bg-red-500'} 
+                    />
                   </div>
                 </div>
                 
@@ -132,7 +139,11 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
                   <Timer className="text-eco-accent" />
                   <div>
                     <p className="text-sm font-medium">Biodegradability</p>
-                    <Progress value={material.biodegradability_rating * 10} className="h-2 mt-1" />
+                    <Progress 
+                      value={material.biodegradability_rating * 10} 
+                      className="h-2 mt-1" 
+                      indicatorClassName={material.biodegradability_rating > 7 ? 'bg-green-500' : material.biodegradability_rating > 4 ? 'bg-amber-500' : 'bg-red-500'} 
+                    />
                   </div>
                 </div>
               </div>
