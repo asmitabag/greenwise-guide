@@ -80,9 +80,9 @@ const Cart = () => {
         return;
       }
 
-      // Create an order first
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
+      // Create an order first - use type assertion to work around the type issue
+      const { data: orderData, error: orderError } = await (supabase
+        .from('orders' as any)
         .insert({
           user_id: session.user.id,
           total_amount: totalAmountINR,
@@ -95,7 +95,7 @@ const Cart = () => {
           }))
         })
         .select('id')
-        .single();
+        .single() as any);
 
       if (orderError) throw orderError;
       
