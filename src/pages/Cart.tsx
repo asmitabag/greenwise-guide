@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import PaymentForm from "@/components/PaymentForm";
+import { convertToINR, formatINR } from "@/utils/currency";
 
 interface CartItem {
   id: string;
@@ -49,15 +51,19 @@ const Cart = () => {
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [orderId, setOrderId] = useState<string>("");
 
   const { data: cartItems = [], isLoading } = useQuery({
     queryKey: ['cartItems', 'detailed'],
     queryFn: fetchCartItems
   });
 
-  const totalAmount = cartItems.reduce((sum, item) => {
+  const totalAmountUSD = cartItems.reduce((sum, item) => {
     return sum + (item.product.price * item.quantity);
   }, 0);
+  
+  const totalAmountINR = convertToINR(totalAmountUSD);
 
   const handleCheckout = async () => {
     try {
@@ -74,14 +80,40 @@ const Cart = () => {
         return;
       }
 
-      const response = await supabase.functions.invoke('process-checkout', {
-        body: {},
+      // Create an order first
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: session.user.id,
+          total_amount: totalAmountINR,
+          status: 'pending',
+          items: cartItems.map(item => ({
+            product_id: item.product.id,
+            title: item.product.title,
+            quantity: item.quantity,
+            price: convertToINR(item.product.price)
+          }))
+        })
+        .select('id')
+        .single();
+
+      if (orderError) throw orderError;
+      
+      setOrderId(orderData.id);
+      setShowPaymentForm(true);
+      
+    } catch (error) {
+      toast({
+        title: "Checkout failed",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
       });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
+      setIsCheckingOut(false);
+    }
+  };
+  
+  const handlePaymentSuccess = async () => {
+    try {
       // Clear cart data from cache
       await queryClient.invalidateQueries({ queryKey: ['cartItems'] });
       
@@ -93,14 +125,16 @@ const Cart = () => {
       // Redirect to home page or order confirmation
       navigate('/');
     } catch (error) {
-      toast({
-        title: "Checkout failed",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
-      });
+      console.error("Error after payment:", error);
     } finally {
       setIsCheckingOut(false);
+      setShowPaymentForm(false);
     }
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentForm(false);
+    setIsCheckingOut(false);
   };
 
   const updateQuantity = async (itemId: string, newQuantity: number) => {
@@ -183,6 +217,21 @@ const Cart = () => {
     );
   }
 
+  if (showPaymentForm) {
+    return (
+      <div className="min-h-screen bg-eco-background py-8">
+        <div className="container mx-auto px-4">
+          <PaymentForm 
+            amount={totalAmountINR} 
+            orderId={orderId}
+            onSuccess={handlePaymentSuccess}
+            onCancel={handlePaymentCancel}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-eco-background">
       <div className="container mx-auto px-4 py-8">
@@ -246,7 +295,7 @@ const Cart = () => {
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-lg font-bold text-eco-secondary">
-                          ${(item.product.price * item.quantity).toFixed(2)}
+                          {formatINR(convertToINR(item.product.price * item.quantity))}
                         </span>
                         <Button
                           variant="destructive"
@@ -267,7 +316,7 @@ const Cart = () => {
               <div className="flex justify-between items-center mb-6">
                 <span className="text-xl font-semibold">Total</span>
                 <span className="text-2xl font-bold text-eco-secondary">
-                  ${totalAmount.toFixed(2)}
+                  {formatINR(totalAmountINR)}
                 </span>
               </div>
               <div className="flex justify-end">

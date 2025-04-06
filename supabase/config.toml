@@ -4,3 +4,5 @@ project_id = "xubillqzhmicpubjzaqh"
 verify_jwt = true
 [functions.verify-product]
 verify_jwt = true
+[functions.process-payment]
+verify_jwt = true
