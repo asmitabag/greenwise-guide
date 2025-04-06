@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,6 @@ interface PaymentFormProps {
 
 const PaymentForm = ({ amount, orderId, onSuccess, onCancel }: PaymentFormProps) => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStage, setProcessingStage] = useState(0);
