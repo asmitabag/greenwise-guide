@@ -21,6 +21,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [scanSuccess, setScanSuccess] = useState(false);
   const [analysisTimeout, setAnalysisTimeout] = useState<number | null>(null);
+  const [viewFinderActive, setViewFinderActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -72,6 +73,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           videoRef.current.srcObject = stream;
           streamRef.current = stream;
           setIsScanning(true);
+          setViewFinderActive(true);
           setCapturedImage(null);
           setUploadedFile(null);
           
@@ -101,6 +103,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
             videoRef.current.srcObject = fallbackStream;
             streamRef.current = fallbackStream;
             setIsScanning(true);
+            setViewFinderActive(true);
             setCapturedImage(null);
             setUploadedFile(null);
             
@@ -148,6 +151,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     }
     
     setIsScanning(false);
+    setViewFinderActive(false);
   };
 
   const captureImage = () => {
@@ -248,13 +252,14 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         throw new Error("Analysis failed");
       }
 
+      // Save scan to history
       const { error: dbError } = await supabase
         .from('material_scans')
         .insert({
           product_id: productId,
           scan_data: imageData.substring(0, 100) + "...", // Truncate for storage
           confidence_score: scanResult?.confidence || 0.8,
-          detected_materials: scanResult?.materials?.map(m => m.name) || ["cotton", "polyester"],
+          detected_materials: scanResult?.materials?.map(m => m.name) || [],
           user_id: session.user.id
         });
 
@@ -344,6 +349,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     setCapturedImage(null);
     setUploadedFile(null);
     setIsScanning(false);
+    setViewFinderActive(false);
     setIsAnalyzing(false);
     setScanSuccess(false);
   };
@@ -425,7 +431,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                     </div>
                   )}
                 </div>
-              ) : (
+              ) : viewFinderActive ? (
                 <video
                   ref={videoRef}
                   autoPlay
@@ -433,6 +439,10 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                   muted
                   className="w-full max-h-[50vh] object-cover"
                 />
+              ) : (
+                <div className="w-full h-[50vh] flex items-center justify-center bg-gray-900">
+                  <p className="text-white">Camera initializing...</p>
+                </div>
               )}
             </div>
             
@@ -442,7 +452,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                   <Button 
                     onClick={captureAndAnalyze}
                     className="flex-1 bg-eco-primary hover:bg-eco-accent"
-                    disabled={isAnalyzing}
+                    disabled={isAnalyzing || !viewFinderActive}
                   >
                     <Aperture className="w-4 h-4 mr-2" />
                     Capture & Analyze

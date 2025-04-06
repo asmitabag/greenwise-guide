@@ -10,17 +10,27 @@ import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
 const Scanner = () => {
   const [activeTab, setActiveTab] = useState("scanner");
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true);
 
   const handleScanComplete = (productId?: string) => {
     if (productId) {
       setSelectedProduct(productId);
-      setActiveTab("analysis");
+      if (autoNavigateEnabled) {
+        setActiveTab("analysis");
+      }
     }
   };
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProduct(productId);
     setActiveTab("analysis");
+  };
+
+  const handleBackToHistory = () => {
+    // Allow users to manually navigate
+    if (autoNavigateEnabled) {
+      setActiveTab("history");
+    }
   };
 
   return (
@@ -60,11 +70,23 @@ const Scanner = () => {
             {selectedProduct && (
               <ProductAnalysisView 
                 productId={selectedProduct} 
-                onBack={() => setActiveTab("history")} 
+                onBack={handleBackToHistory} 
               />
             )}
           </TabsContent>
         </Tabs>
+        
+        <div className="flex items-center mt-4 text-sm text-gray-500">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={autoNavigateEnabled}
+              onChange={() => setAutoNavigateEnabled(!autoNavigateEnabled)}
+              className="mr-2 h-4 w-4"
+            />
+            Enable automatic navigation between pages
+          </label>
+        </div>
       </div>
     </div>
   );
