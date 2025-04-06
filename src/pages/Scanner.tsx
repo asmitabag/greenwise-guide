@@ -10,7 +10,7 @@ import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
 const Scanner = () => {
   const [activeTab, setActiveTab] = useState("scanner");
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true);
+  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(false); // Default to disabled
 
   const handleScanComplete = (productId?: string) => {
     if (productId) {
@@ -27,10 +27,10 @@ const Scanner = () => {
   };
 
   const handleBackToHistory = () => {
-    // Allow users to manually navigate
     if (autoNavigateEnabled) {
       setActiveTab("history");
     }
+    // When auto-navigation is disabled, user controls navigation manually
   };
 
   return (
