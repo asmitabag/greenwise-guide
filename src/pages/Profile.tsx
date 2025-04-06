@@ -1,280 +1,222 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import type { User } from '@supabase/supabase-js';
-import type { Json } from '@/integrations/supabase/types';
-
-interface NotificationSettings {
-  email_notifications: boolean;
-  product_updates: boolean;
-  sustainability_tips: boolean;
-}
-
-interface UserPreferences {
-  preferred_categories: string[];
-  favorite_brands: string[];
-}
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import OrderHistorySection from "@/components/profile/OrderHistorySection";
+import { Leaf, ShoppingBag, Settings, LogOut } from "lucide-react";
 
 const Profile = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [sustainabilityPoints, setSustainabilityPoints] = useState(0);
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    email_notifications: true,
-    product_updates: true,
-    sustainability_tips: true,
-  });
-  const [preferences, setPreferences] = useState<UserPreferences>({
-    preferred_categories: [],
-    favorite_brands: [],
-  });
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/auth');
-        return;
-      }
-      setUser(session.user);
-      fetchProfile(session.user.id);
-    };
-
-    getSession();
-  }, [navigate]);
-
-  const fetchProfile = async (userId: string) => {
-    try {
+  const [activeTab, setActiveTab] = useState("account");
+  
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getUser();
+      return data.user;
+    }
+  });
+  
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, avatar_url, sustainability_points, notification_settings, preferences, preferred_categories, favorite_brands')
-        .eq('id', userId)
+        .select('*')
+        .eq('id', user.id)
         .single();
-
+      
       if (error) throw error;
-
-      if (data) {
-        setUsername(data.username || '');
-        setAvatarUrl(data.avatar_url || '');
-        setSustainabilityPoints(data.sustainability_points || 0);
-        
-        // Handle notification settings with proper type casting
-        const defaultNotifications: NotificationSettings = {
-          email_notifications: true,
-          product_updates: true,
-          sustainability_tips: true,
-        };
-        
-        // Parse the notification settings from JSON if it exists
-        const notificationData = data.notification_settings as Json;
-        if (notificationData && typeof notificationData === 'object' && !Array.isArray(notificationData)) {
-          setNotifications({
-            ...defaultNotifications,
-            email_notifications: Boolean(notificationData.email_notifications ?? true),
-            product_updates: Boolean(notificationData.product_updates ?? true),
-            sustainability_tips: Boolean(notificationData.sustainability_tips ?? true),
-          });
-        } else {
-          setNotifications(defaultNotifications);
-        }
-        
-        // Set preferences with proper defaults
-        setPreferences({
-          preferred_categories: data.preferred_categories || [],
-          favorite_brands: data.favorite_brands || [],
-        });
+      return data;
+    },
+    enabled: !!user?.id
+  });
+  
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        navigate("/auth");
       }
-    } catch (error: any) {
-      toast({
-        title: 'Error fetching profile',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateProfile = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      
-      // Convert notification settings to a JSON-compatible object
-      const notificationSettingsJson: Record<string, boolean> = {
-        email_notifications: notifications.email_notifications,
-        product_updates: notifications.product_updates,
-        sustainability_tips: notifications.sustainability_tips,
-      };
-      
-      // Convert preferences to a JSON-compatible object
-      const preferencesJson = {
-        preferred_categories: preferences.preferred_categories,
-        favorite_brands: preferences.favorite_brands,
-      };
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          username,
-          avatar_url: avatarUrl,
-          notification_settings: notificationSettingsJson,
-          preferences: preferencesJson,
-          preferred_categories: preferences.preferred_categories,
-          favorite_brands: preferences.favorite_brands,
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Success',
-        description: 'Profile updated successfully!',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error updating profile',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    };
+    
+    checkAuth();
+  }, [navigate]);
+  
   const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate('/auth');
-    } catch (error: any) {
-      toast({
-        title: 'Error signing out',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
+    await supabase.auth.signOut();
+    navigate("/auth");
   };
-
-  if (loading) {
+  
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-eco-background p-4 sm:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-40 bg-gray-200 rounded"></div>
+          </div>
+        </div>
       </div>
     );
   }
-
+  
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-6">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="avatar">Avatar URL</Label>
-                <Input
-                  id="avatar"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
+    <div className="min-h-screen bg-eco-background p-4 sm:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold text-eco-primary">My Profile</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex flex-col items-center space-y-3">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={profile?.avatar_url || ""} />
+                    <AvatarFallback>
+                      {user?.email?.substring(0, 2).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-center">
+                    <h3 className="font-medium">{profile?.username || user?.email}</h3>
+                    <p className="text-sm text-gray-500">{user?.email}</p>
+                  </div>
+                  <div className="bg-green-50 p-2 rounded-lg text-center w-full">
+                    <div className="flex justify-center items-center gap-1 text-green-700">
+                      <Leaf className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        Eco Score: {profile?.eco_score || 0}/100
+                      </span>
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">
+                      {profile?.sustainability_points || 0} sustainability points
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="flex flex-col space-y-2">
+              <Button
+                variant={activeTab === "account" ? "default" : "outline"}
+                className={activeTab === "account" ? "bg-eco-primary" : ""}
+                onClick={() => setActiveTab("account")}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Account
+              </Button>
+              <Button
+                variant={activeTab === "orders" ? "default" : "outline"}
+                className={activeTab === "orders" ? "bg-eco-primary" : ""}
+                onClick={() => setActiveTab("orders")}
+              >
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                Orders
+              </Button>
+              <Button 
+                variant="outline" 
+                className="mt-4 border-red-200 text-red-600 hover:bg-red-50"
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Sustainability Stats</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium">
-              Sustainability Points: {sustainabilityPoints}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Notification Preferences</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="email_notifications">Email Notifications</Label>
-                <Switch
-                  id="email_notifications"
-                  checked={notifications.email_notifications}
-                  onCheckedChange={(checked) =>
-                    setNotifications(prev => ({ ...prev, email_notifications: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="product_updates">Product Updates</Label>
-                <Switch
-                  id="product_updates"
-                  checked={notifications.product_updates}
-                  onCheckedChange={(checked) =>
-                    setNotifications(prev => ({ ...prev, product_updates: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="sustainability_tips">Sustainability Tips</Label>
-                <Switch
-                  id="sustainability_tips"
-                  checked={notifications.sustainability_tips}
-                  onCheckedChange={(checked) =>
-                    setNotifications(prev => ({ ...prev, sustainability_tips: checked }))
-                  }
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex gap-4">
-          <Button
-            onClick={updateProfile}
-            disabled={loading}
-            className="flex-1"
-          >
-            {loading ? 'Saving...' : 'Update Profile'}
-          </Button>
-
-          <Button
-            onClick={handleSignOut}
-            variant="outline"
-            className="flex-1"
-          >
-            Sign Out
-          </Button>
+          </div>
+          
+          {/* Main content */}
+          <div className="md:col-span-3 space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsContent value="account">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Account Details</CardTitle>
+                    <CardDescription>Update your personal information</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Username</h4>
+                        <div className="border p-3 rounded-md">
+                          {profile?.username || "Not set"}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Email</h4>
+                        <div className="border p-3 rounded-md">
+                          {user?.email}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Sustainability Preferences</h4>
+                      <div className="border p-4 rounded-md grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Favorite Categories</p>
+                          <div className="flex flex-wrap gap-1">
+                            {profile?.preferred_categories?.map((category, index) => (
+                              <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                {category}
+                              </span>
+                            )) || (
+                              <span className="text-xs text-gray-500">No preferences set</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Favorite Brands</p>
+                          <div className="flex flex-wrap gap-1">
+                            {profile?.favorite_brands?.map((brand, index) => (
+                              <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                {brand}
+                              </span>
+                            )) || (
+                              <span className="text-xs text-gray-500">No favorites set</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Sustainability Impact</h4>
+                      <div className="border p-4 rounded-md">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Eco Score</span>
+                          <span className="text-sm font-medium text-green-600">
+                            {profile?.eco_score || 0}/100
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                          <div 
+                            className="bg-green-500 h-full"
+                            style={{ width: `${profile?.eco_score || 0}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Your eco-score increases as you purchase sustainable products and engage with eco-friendly features.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="orders">
+                <OrderHistorySection />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>

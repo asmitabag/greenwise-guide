@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Aperture, AlertCircle, Upload, Redo } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -29,14 +28,12 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Cleanup camera resources when component unmounts
   useEffect(() => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
       
-      // Clear any pending timeouts
       if (analysisTimeout) {
         clearTimeout(analysisTimeout);
       }
@@ -51,11 +48,9 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       setScanSuccess(false);
       
       if (streamRef.current) {
-        // Stop any existing stream
         streamRef.current.getTracks().forEach(track => track.stop());
       }
       
-      // Try to access the environment/back camera on mobile
       let constraints: MediaStreamConstraints = {
         video: {
           facingMode: isMobile ? "environment" : "user",
@@ -77,7 +72,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           setCapturedImage(null);
           setUploadedFile(null);
           
-          // Play the video once loaded
           videoRef.current.onloadedmetadata = () => {
             if (videoRef.current) {
               videoRef.current.play().catch(e => {
@@ -92,7 +86,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       } catch (mobileError) {
         console.error("Initial camera access error:", mobileError);
         
-        // Fallback to any available camera
         console.log("Falling back to any camera");
         try {
           const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
@@ -161,7 +154,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     }
 
     try {
-      // Create canvas if it doesn't exist
       if (!canvasRef.current) {
         canvasRef.current = document.createElement('canvas');
       }
@@ -169,7 +161,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
-      // Set canvas size to match video dimensions
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
@@ -180,10 +171,8 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         throw new Error("Could not get canvas context");
       }
       
-      // Draw the current video frame to the canvas
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      // Convert canvas to data URL
       const imageData = canvas.toDataURL('image/jpeg', 0.8);
       console.log("Image captured successfully");
       
@@ -214,8 +203,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
 
       setIsAnalyzing(true);
       
-      // Set a timeout to ensure we don't wait forever for analysis
-      // This ensures users get a response within 10 seconds maximum
       const timeoutId = window.setTimeout(() => {
         console.log("Analysis taking longer than expected, showing results anyway");
         setIsAnalyzing(false);
@@ -237,7 +224,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         }
       });
 
-      // Clear the timeout since we got a response
       clearTimeout(timeoutId);
       setAnalysisTimeout(null);
 
@@ -252,12 +238,11 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         throw new Error("Analysis failed");
       }
 
-      // Save scan to history
       const { error: dbError } = await supabase
         .from('material_scans')
         .insert({
           product_id: productId,
-          scan_data: imageData.substring(0, 100) + "...", // Truncate for storage
+          scan_data: imageData.substring(0, 100) + "...",
           confidence_score: scanResult?.confidence || 0.8,
           detected_materials: scanResult?.materials?.map(m => m.name) || [],
           user_id: session.user.id
@@ -283,7 +268,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         description: "Results are now available.",
       });
       
-      // Even if there's an error, we'll show results
       setScanSuccess(true);
       setIsAnalyzing(false);
       return true;
@@ -291,15 +275,34 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   };
 
   const captureAndAnalyze = async () => {
-    // Stop camera after capturing
     const imageData = captureImage();
     if (!imageData) return;
     
     setCapturedImage(imageData);
     stopCamera();
     
-    // Analyze the captured image
-    await analyzeImage(imageData);
+    const success = await analyzeImage(imageData);
+    
+    if (success) {
+      try {
+        const { error } = await supabase
+          .from('material_scans')
+          .insert({
+            product_id: productId,
+            scan_data: imageData.substring(0, 100) + "...",
+            user_id: (await supabase.auth.getUser()).data.user?.id,
+            detected_materials: ["Scanned materials"]
+          });
+          
+        if (error) {
+          console.error("Error saving scan to history:", error);
+        } else {
+          console.log("Scan successfully saved to history");
+        }
+      } catch (err) {
+        console.error("Failed to save scan history:", err);
+      }
+    }
   };
 
   const openFileUpload = () => {
@@ -316,13 +319,33 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     setUploadedFile(file);
     
     try {
-      // Convert file to base64
       const reader = new FileReader();
       reader.onloadend = async () => {
         const imageData = reader.result as string;
         console.log("File converted to base64");
         setCapturedImage(imageData);
-        await analyzeImage(imageData, file.name);
+        const success = await analyzeImage(imageData, file.name);
+        
+        if (success) {
+          try {
+            const { error } = await supabase
+              .from('material_scans')
+              .insert({
+                product_id: productId,
+                scan_data: imageData.substring(0, 100) + "...",
+                user_id: (await supabase.auth.getUser()).data.user?.id,
+                detected_materials: ["Uploaded materials"]
+              });
+              
+            if (error) {
+              console.error("Error saving scan to history:", error);
+            } else {
+              console.log("Scan successfully saved to history");
+            }
+          } catch (err) {
+            console.error("Failed to save scan history:", err);
+          }
+        }
       };
       
       reader.onerror = (error) => {
