@@ -13,6 +13,9 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [showScanner, setShowScanner] = useState(false);
   const [scanAttempted, setScanAttempted] = useState(false);
 
+  // Use a valid UUID or numeric ID format for consistent handling
+  const SCAN_PRODUCT_ID = "5"; // Default to product id 5 (Solar Power Bank)
+
   const handleScanComplete = (productId?: string) => {
     setScanAttempted(true);
     if (productId) {
@@ -64,7 +67,7 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
           </div>
         ) : (
           <MaterialScanner 
-            productId="external-scan" 
+            productId={SCAN_PRODUCT_ID} 
             onScanComplete={handleScanComplete}
           />
         )}
