@@ -17,6 +17,15 @@ export const formatCurrency = (value: number, currency: string = "USD"): string 
 };
 
 /**
+ * Format a numeric value as INR (Indian Rupees)
+ * @param value - The numeric value to format
+ * @returns Formatted INR string
+ */
+export const formatINR = (value: number): string => {
+  return formatCurrency(value, "INR");
+};
+
+/**
  * Get the appropriate locale for a currency
  */
 const getCurrencyLocale = (currency: string): string => {
@@ -94,3 +103,13 @@ export const convertCurrency = (
   // Apply the conversion
   return value * rate;
 };
+
+/**
+ * Convert USD to INR
+ * @param value - The USD value to convert to INR
+ * @returns Value in INR
+ */
+export const convertToINR = (value: number): number => {
+  return convertCurrency(value, "USD", "INR");
+};
+
