@@ -10,25 +10,29 @@ import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
 const Scanner = () => {
   const [activeTab, setActiveTab] = useState("scanner");
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true); // Changed to true by default
+  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true); // Default to true
 
-  // Make sure the product ID gets passed correctly from the scanner to the analysis
+  // Enhanced scan complete handler that sets product ID and navigates to analysis
   const handleScanComplete = (productId?: string) => {
     if (productId) {
       console.log("Scan complete with product ID:", productId);
       setSelectedProduct(productId);
+      
+      // Auto-navigate to analysis if enabled
       if (autoNavigateEnabled) {
         setActiveTab("analysis");
       }
     }
   };
 
+  // Select a product from history and navigate to its analysis
   const handleSelectProduct = (productId: string) => {
     console.log("Product selected from history:", productId);
     setSelectedProduct(productId);
     setActiveTab("analysis");
   };
 
+  // Handle back navigation from analysis with auto-navigation awareness
   const handleBackToHistory = () => {
     if (autoNavigateEnabled) {
       setActiveTab("history");

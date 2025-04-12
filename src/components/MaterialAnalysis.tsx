@@ -32,6 +32,7 @@ interface Certification {
 
 // Fixed predefined materials data for the first 5 products with accurate descriptions
 const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
+  // Bamboo Water Bottle - ID: 1
   "1": [
     {
       id: "1-1",
@@ -70,6 +71,7 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       product_id: "1"
     }
   ],
+  // Organic Cotton T-Shirt - ID: 2
   "2": [
     {
       id: "2-1",
@@ -108,6 +110,7 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       product_id: "2"
     }
   ],
+  // Natural Face Cream - ID: 3
   "3": [
     {
       id: "3-1",
@@ -144,8 +147,21 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       biodegradability_rating: 8,
       certification_ids: ["cert-3"],
       product_id: "3"
+    },
+    {
+      id: "3-4",
+      material_name: "Coconut Oil",
+      eco_score: 8,
+      impact_description: "Natural oil with excellent moisturizing properties",
+      carbon_footprint: 0.9,
+      water_usage: 30,
+      recyclability_rating: 8,
+      biodegradability_rating: 9,
+      certification_ids: ["cert-1", "cert-4"],
+      product_id: "3"
     }
   ],
+  // Recycled Coffee Cup - ID: 4
   "4": [
     {
       id: "4-1",
@@ -184,6 +200,7 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       product_id: "4"
     }
   ],
+  // Solar Power Bank - ID: 5
   "5": [
     {
       id: "5-1",
@@ -220,8 +237,21 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       biodegradability_rating: 0,
       certification_ids: [],
       product_id: "5"
+    },
+    {
+      id: "5-4",
+      material_name: "Circuit Board Components",
+      eco_score: 2,
+      impact_description: "Electronic components with various metals and plastics",
+      carbon_footprint: 9.8,
+      water_usage: 150,
+      recyclability_rating: 3,
+      biodegradability_rating: 0,
+      certification_ids: [],
+      product_id: "5"
     }
   ],
+  // Perfume
   "perfume": [
     {
       id: "perfume-1",
@@ -271,8 +301,31 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       certification_ids: ["cert-4"],
       product_id: "perfume"
     }
+  ],
+  // Adding specific mappings for product keywords to ensure correct materials are shown
+  "bamboo-water-bottle": [
+    // Same as "1" materials
+  ],
+  "organic-cotton-shirt": [
+    // Same as "2" materials
+  ],
+  "natural-face-cream": [
+    // Same as "3" materials
+  ],
+  "recycled-coffee-cup": [
+    // Same as "4" materials
+  ],
+  "solar-power-bank": [
+    // Same as "5" materials
   ]
 };
+
+// Copy the predefined materials to their keyword-based counterparts
+predefinedMaterials["bamboo-water-bottle"] = predefinedMaterials["1"];
+predefinedMaterials["organic-cotton-shirt"] = predefinedMaterials["2"];
+predefinedMaterials["natural-face-cream"] = predefinedMaterials["3"];
+predefinedMaterials["recycled-coffee-cup"] = predefinedMaterials["4"];
+predefinedMaterials["solar-power-bank"] = predefinedMaterials["5"];
 
 // Predefined certifications
 const defaultCertifications: Certification[] = [
@@ -302,55 +355,75 @@ const defaultCertifications: Certification[] = [
   }
 ];
 
-// Product descriptions for additional context
+// Product descriptions for additional context - ensuring correct product descriptions
 const productDescriptions = {
   "1": "Bamboo Water Bottle with stainless steel liner and silicone seals",
   "2": "Organic Cotton T-shirt with natural dyes and minimal elastane",
-  "3": "Natural Face Cream with aloe vera, shea butter and beeswax",
+  "3": "Natural Face Cream with aloe vera, shea butter, coconut oil and beeswax",
   "4": "Recycled Coffee Cup with plant-based lining and vegetable inks",
   "5": "Solar Power Bank with recycled aluminum casing, solar panels and battery",
-  "perfume": "Fragrance with alcohol base, perfume compounds, fixatives and natural extracts"
+  "perfume": "Fragrance with alcohol base, perfume compounds, fixatives and natural extracts",
+  "bamboo-water-bottle": "Bamboo Water Bottle with stainless steel liner and silicone seals",
+  "organic-cotton-shirt": "Organic Cotton T-shirt with natural dyes and minimal elastane",
+  "natural-face-cream": "Natural Face Cream with aloe vera, shea butter, coconut oil and beeswax",
+  "recycled-coffee-cup": "Recycled Coffee Cup with plant-based lining and vegetable inks",
+  "solar-power-bank": "Solar Power Bank with recycled aluminum casing, solar panels and battery"
 };
 
 const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
   const normalizedProductId = productId.startsWith('fc') ? productId : productId.trim();
   
-  // Check if this is a known product type or perfume
-  let isPredefinedProduct = ["1", "2", "3", "4", "5", "perfume"].includes(normalizedProductId);
-  
-  // If not a direct match, check if it contains one of our known IDs
-  if (!isPredefinedProduct) {
-    for (const id of ["1", "2", "3", "4", "5", "perfume"]) {
-      if (normalizedProductId.includes(id)) {
-        isPredefinedProduct = true;
-        break;
+  // Detailed mapping logic to ensure correct materials are shown for each product
+  const determineProductType = (id: string): string => {
+    // Direct matches
+    if (["1", "2", "3", "4", "5", "perfume"].includes(id)) {
+      return id;
+    }
+    
+    // Check for string matches in ID
+    if (id.includes("bottle") || id.includes("bamboo")) {
+      return "1";
+    }
+    if (id.includes("shirt") || id.includes("cotton") || id.includes("tshirt")) {
+      return "2";
+    }
+    if (id.includes("cream") || id.includes("face")) {
+      return "3";
+    }
+    if (id.includes("coffee") || id.includes("cup")) {
+      return "4";
+    }
+    if (id.includes("power") || id.includes("solar") || id.includes("bank")) {
+      return "5";
+    }
+    if (id.includes("perfume") || id.includes("fragrance") || id.includes("cologne")) {
+      return "perfume";
+    }
+    
+    // Check numeric matches
+    for (const num of ["1", "2", "3", "4", "5"]) {
+      if (id.includes(num)) {
+        return num;
       }
     }
-  }
+    
+    // Default case
+    return "perfume";
+  };
+  
+  // Determine product type
+  const productType = determineProductType(normalizedProductId);
+  console.log(`Determined product type for ${normalizedProductId}: ${productType}`);
   
   const { data: materials = [], isLoading: materialsLoading, error: materialsError } = useQuery({
     queryKey: ['material-analysis', normalizedProductId],
     queryFn: async () => {
-      console.log(`Checking materials for product ${normalizedProductId}`);
+      console.log(`Checking materials for product ${normalizedProductId}, determined type: ${productType}`);
       
-      // Always check predefined materials first
-      if (isPredefinedProduct) {
-        // Find the matching product ID
-        let productKey = normalizedProductId;
-        
-        if (normalizedProductId.includes("perfume")) {
-          productKey = "perfume";
-        } else {
-          for (const id of ["1", "2", "3", "4", "5"]) {
-            if (normalizedProductId.includes(id)) {
-              productKey = id;
-              break;
-            }
-          }
-        }
-        
-        console.log(`Using predefined materials for product ${productKey}`);
-        return predefinedMaterials[productKey] || [];
+      // Try to use our predefined materials based on determined product type
+      if (predefinedMaterials[productType]) {
+        console.log(`Using predefined materials for product type ${productType}`);
+        return predefinedMaterials[productType];
       }
       
       console.log(`Fetching materials for product ${normalizedProductId} from Supabase`);
@@ -364,8 +437,16 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
         throw error;
       }
       
-      // If no materials found, fallback to perfume for scanned items
+      // If no materials found, try to use a fallback based on product ID keywords
       if (!data || data.length === 0) {
+        // Look for product type clues in the ID
+        for (const [key, value] of Object.entries(predefinedMaterials)) {
+          if (normalizedProductId.toLowerCase().includes(key.toLowerCase())) {
+            console.log(`No specific data found, using materials for ${key} as fallback`);
+            return value;
+          }
+        }
+        
         console.log(`No data found, using perfume materials as fallback`);
         return predefinedMaterials["perfume"];
       }
@@ -423,16 +504,8 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
     );
   }
 
-  // Determine which product this is for additional context
-  let productKey = normalizedProductId;
-  for (const id of ["1", "2", "3", "4", "5", "perfume"]) {
-    if (normalizedProductId.includes(id)) {
-      productKey = id;
-      break;
-    }
-  }
-  
-  const productDescription = productDescriptions[productKey as keyof typeof productDescriptions] || "";
+  // Get the relevant product description
+  const productDescription = productDescriptions[productType] || productDescriptions[determineProductType(normalizedProductId)];
 
   return (
     <div className="space-y-4">

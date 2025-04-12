@@ -33,7 +33,7 @@ interface AnalysisResult {
   };
 }
 
-// Product descriptions for additional context
+// Product descriptions for additional context - ensuring correct product descriptions
 const productDescriptions = {
   "1": "Bamboo Water Bottle",
   "2": "Organic Cotton T-shirt",
@@ -43,30 +43,81 @@ const productDescriptions = {
   "perfume": "Fragrance"
 };
 
+// Product type mapping - ensuring the correct product type is determined
+const productTypeMapping = {
+  "1": "bamboo-water-bottle",
+  "2": "organic-cotton-shirt",
+  "3": "natural-face-cream",
+  "4": "recycled-coffee-cup",
+  "5": "solar-power-bank",
+  "perfume": "perfume"
+};
+
 const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   
-  // Determine product type for accurate analysis
-  let productType = "";
-  if (productId.includes("perfume")) {
-    productType = "perfume";
-  } else {
-    for (const [id, type] of Object.entries(["1", "2", "3", "4", "5"])) {
-      if (productId.includes(id)) {
-        productType = id;
-        break;
+  // Determine product type accurately for analysis
+  const determineProductType = (id: string): string => {
+    // Direct matches
+    if (productTypeMapping[id as keyof typeof productTypeMapping]) {
+      return productTypeMapping[id as keyof typeof productTypeMapping];
+    }
+    
+    // Check for single digit matches
+    for (const [key, value] of Object.entries(productTypeMapping)) {
+      if (id.includes(key)) {
+        return value;
       }
     }
-  }
+    
+    // Check for keyword matches
+    if (id.toLowerCase().includes('bottle') || id.toLowerCase().includes('bamboo')) {
+      return "bamboo-water-bottle";
+    }
+    if (id.toLowerCase().includes('shirt') || id.toLowerCase().includes('cotton') || id.toLowerCase().includes('tshirt')) {
+      return "organic-cotton-shirt";
+    }
+    if (id.toLowerCase().includes('cream') || id.toLowerCase().includes('face')) {
+      return "natural-face-cream";
+    }
+    if (id.toLowerCase().includes('coffee') || id.toLowerCase().includes('cup')) {
+      return "recycled-coffee-cup";
+    }
+    if (id.toLowerCase().includes('power') || id.toLowerCase().includes('solar') || id.toLowerCase().includes('bank')) {
+      return "solar-power-bank";
+    }
+    if (id.toLowerCase().includes('perfume') || id.toLowerCase().includes('fragrance') || id.toLowerCase().includes('cologne')) {
+      return "perfume";
+    }
+    
+    // Default
+    return "perfume";
+  };
+  
+  const productType = determineProductType(productId);
+  console.log(`Determined product type for analysis: ${productType}`);
   
   // Get product description for display
-  let productName = "Unknown Product";
-  for (const [id, name] of Object.entries(productDescriptions)) {
-    if (productId.includes(id)) {
-      productName = name;
-      break;
+  const determineProductName = (id: string): string => {
+    // Direct matches
+    for (const [key, value] of Object.entries(productDescriptions)) {
+      if (id.includes(key)) {
+        return value;
+      }
     }
-  }
+    
+    // Keyword matches
+    if (id.toLowerCase().includes('bottle')) return "Bamboo Water Bottle";
+    if (id.toLowerCase().includes('shirt')) return "Organic Cotton T-shirt";
+    if (id.toLowerCase().includes('cream')) return "Natural Face Cream";
+    if (id.toLowerCase().includes('coffee')) return "Recycled Coffee Cup";
+    if (id.toLowerCase().includes('power')) return "Solar Power Bank";
+    if (id.toLowerCase().includes('perfume')) return "Fragrance";
+    
+    return "Unknown Product";
+  };
+  
+  let productName = determineProductName(productId);
   
   const { data: scanHistory, isLoading } = useQuery({
     queryKey: ['scan-history', productId],

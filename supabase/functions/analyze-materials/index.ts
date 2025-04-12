@@ -192,14 +192,19 @@ const predefinedMaterials = {
   }
 };
 
-// Product ID to predefined material type mapping
+// Product ID to predefined material type mapping - improved mapping with clearer identifiers
 const productIdToType = {
   "1": "bamboo-water-bottle",
   "2": "organic-cotton-shirt",
   "3": "natural-face-cream",
   "4": "recycled-coffee-cup",
   "5": "solar-power-bank",
-  "perfume": "perfume"
+  "perfume": "perfume",
+  "bamboo-water-bottle": "bamboo-water-bottle",
+  "organic-cotton-shirt": "organic-cotton-shirt", 
+  "natural-face-cream": "natural-face-cream",
+  "recycled-coffee-cup": "recycled-coffee-cup",
+  "solar-power-bank": "solar-power-bank"
 };
 
 // Enhanced material analysis based on actual image content
@@ -235,12 +240,29 @@ function analyzeMaterials(imageData: string, fileName?: string, productId?: stri
       return predefinedMaterials[type as keyof typeof predefinedMaterials];
     }
     
-    // Check if productId contains one of our known IDs
+    // Check if productId contains one of our known IDs or keywords
     for (const [id, typeName] of Object.entries(productIdToType)) {
       if (productId.includes(id)) {
         console.log(`Found predefined material type for ID containing ${id}: ${typeName}`);
         return predefinedMaterials[typeName as keyof typeof predefinedMaterials];
       }
+    }
+    
+    // Check for specific keywords in the productId
+    if (productId.toLowerCase().includes('bottle') || productId.toLowerCase().includes('bamboo')) {
+      return predefinedMaterials["bamboo-water-bottle"];
+    } 
+    if (productId.toLowerCase().includes('shirt') || productId.toLowerCase().includes('cotton')) {
+      return predefinedMaterials["organic-cotton-shirt"];
+    }
+    if (productId.toLowerCase().includes('cream') || productId.toLowerCase().includes('face')) {
+      return predefinedMaterials["natural-face-cream"];
+    }
+    if (productId.toLowerCase().includes('coffee') || productId.toLowerCase().includes('cup')) {
+      return predefinedMaterials["recycled-coffee-cup"];
+    }
+    if (productId.toLowerCase().includes('power') || productId.toLowerCase().includes('solar')) {
+      return predefinedMaterials["solar-power-bank"];
     }
   }
   
@@ -248,19 +270,19 @@ function analyzeMaterials(imageData: string, fileName?: string, productId?: stri
   if (fileName) {
     const lowerFileName = fileName.toLowerCase();
     
-    if (lowerFileName.includes("bottle") || lowerFileName.includes("water")) {
+    if (lowerFileName.includes("bottle") || lowerFileName.includes("water") || lowerFileName.includes("bamboo")) {
       return predefinedMaterials["bamboo-water-bottle"];
     } 
-    else if (lowerFileName.includes("shirt") || lowerFileName.includes("cotton")) {
+    else if (lowerFileName.includes("shirt") || lowerFileName.includes("cotton") || lowerFileName.includes("tshirt") || lowerFileName.includes("t-shirt")) {
       return predefinedMaterials["organic-cotton-shirt"];
     }
-    else if (lowerFileName.includes("cream") || lowerFileName.includes("face")) {
+    else if (lowerFileName.includes("cream") || lowerFileName.includes("face") || lowerFileName.includes("skincare")) {
       return predefinedMaterials["natural-face-cream"];
     }
     else if (lowerFileName.includes("coffee") || lowerFileName.includes("cup")) {
       return predefinedMaterials["recycled-coffee-cup"];
     }
-    else if (lowerFileName.includes("power") || lowerFileName.includes("solar")) {
+    else if (lowerFileName.includes("power") || lowerFileName.includes("solar") || lowerFileName.includes("bank")) {
       return predefinedMaterials["solar-power-bank"];
     }
     // Default to perfume if no other matches found
