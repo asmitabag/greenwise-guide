@@ -33,8 +33,40 @@ interface AnalysisResult {
   };
 }
 
+// Product descriptions for additional context
+const productDescriptions = {
+  "1": "Bamboo Water Bottle",
+  "2": "Organic Cotton T-shirt",
+  "3": "Natural Face Cream",
+  "4": "Recycled Coffee Cup",
+  "5": "Solar Power Bank",
+  "perfume": "Fragrance"
+};
+
 const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  
+  // Determine product type for accurate analysis
+  let productType = "";
+  if (productId.includes("perfume")) {
+    productType = "perfume";
+  } else {
+    for (const [id, type] of Object.entries(["1", "2", "3", "4", "5"])) {
+      if (productId.includes(id)) {
+        productType = id;
+        break;
+      }
+    }
+  }
+  
+  // Get product description for display
+  let productName = "Unknown Product";
+  for (const [id, name] of Object.entries(productDescriptions)) {
+    if (productId.includes(id)) {
+      productName = name;
+      break;
+    }
+  }
   
   const { data: scanHistory, isLoading } = useQuery({
     queryKey: ['scan-history', productId],
@@ -50,82 +82,25 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     }
   });
   
-  useEffect(() => {
-    // Generate mock analysis result if we don't have real data yet
-    if (!analysisResult) {
-      const mockResult: AnalysisResult = {
-        materials: [
-          { 
-            name: "Palm Oil", 
-            percentage: 15, 
-            eco_score: 3, 
-            sustainable: false, 
-            details: "High deforestation impact, often causes habitat destruction" 
-          },
-          { 
-            name: "Wheat Flour", 
-            percentage: 55, 
-            eco_score: 7, 
-            sustainable: true, 
-            details: "Generally sustainable, but water intensive in some regions" 
-          },
-          { 
-            name: "Artificial Colors", 
-            percentage: 2, 
-            eco_score: 4, 
-            sustainable: false, 
-            details: "Chemical processing with potential environmental impacts" 
-          },
-          { 
-            name: "Salt", 
-            percentage: 8, 
-            eco_score: 6, 
-            sustainable: true, 
-            details: "Natural mineral, but mining can have local impacts" 
-          },
-          { 
-            name: "Spices", 
-            percentage: 20, 
-            eco_score: 8, 
-            sustainable: true, 
-            details: "Generally sustainably grown with lower environmental impact" 
-          }
-        ],
-        eco_score: 6.2,
-        warnings: [
-          "Contains palm oil which is linked to deforestation",
-          "Artificial colors may have environmental production impacts",
-          "High sodium content has both health and water usage impacts"
-        ],
-        recommendations: [
-          "Look for alternatives with no palm oil",
-          "Choose products with natural colors instead of artificial ones",
-          "Check for sustainability certifications on packaging"
-        ],
-        metrics: {
-          water_saved: 750,
-          energy_efficiency: 25,
-          biodegradable_percentage: 83
-        }
-      };
-      
-      setAnalysisResult(mockResult);
-    }
-  }, [analysisResult]);
-  
   // Function to fetch detailed analysis from Supabase Edge Function
   useEffect(() => {
     const fetchAnalysis = async () => {
       try {
+        console.log(`Fetching analysis for product ID: ${productId}, type: ${productType}`);
+        
         const { data } = await supabase.functions.invoke('analyze-materials', {
           body: { 
             image: "fetch-only",
-            productId: productId
+            productId: productId,
+            productType: productType
           }
         });
         
         if (data && data.success) {
+          console.log("Analysis data received:", data);
           setAnalysisResult(data);
+        } else {
+          console.error("Error in analysis data:", data);
         }
       } catch (error) {
         console.error("Error fetching analysis:", error);
@@ -133,7 +108,7 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     };
     
     fetchAnalysis();
-  }, [productId]);
+  }, [productId, productType]);
 
   if (isLoading || !analysisResult) {
     return (
@@ -158,6 +133,7 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
           <div>
             <CardTitle className="text-xl">Material Analysis</CardTitle>
             <CardDescription>Detailed breakdown of materials and their environmental impact</CardDescription>
+            <p className="text-sm text-gray-600 mt-1">Analyzing: {productName}</p>
           </div>
           <div>
             <Badge className={`${analysisResult.eco_score > 7 ? 'bg-green-500' : analysisResult.eco_score > 4 ? 'bg-amber-500' : 'bg-red-500'} text-white`}>
@@ -210,17 +186,18 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
               <div className="flex justify-between items-center">
                 <span className="font-medium">{material.name}</span>
                 <Badge variant={material.sustainable ? "outline" : "secondary"} className={material.sustainable ? "border-green-500 text-green-700" : "bg-gray-200 text-gray-700"}>
-                  {material.sustainable ? "Sustainable" : "Less Sustainable"}
+                  {material.percentage}% | {material.sustainable ? "Sustainable" : "Less Sustainable"}
                 </Badge>
               </div>
               
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500 w-16">{material.percentage}%</span>
+                <span className="text-sm text-gray-500 w-16">Eco Score:</span>
                 <Progress 
-                  value={material.percentage} 
+                  value={material.eco_score * 10} 
                   className="h-2 flex-1" 
                   indicatorClassName={material.eco_score > 7 ? 'bg-green-500' : material.eco_score > 4 ? 'bg-amber-500' : 'bg-red-500'} 
                 />
+                <span className="text-sm font-medium">{material.eco_score}/10</span>
               </div>
               
               <p className="text-xs text-gray-600">{material.details}</p>

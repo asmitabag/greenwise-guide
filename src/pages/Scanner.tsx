@@ -12,8 +12,10 @@ const Scanner = () => {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true); // Changed to true by default
 
+  // Make sure the product ID gets passed correctly from the scanner to the analysis
   const handleScanComplete = (productId?: string) => {
     if (productId) {
+      console.log("Scan complete with product ID:", productId);
       setSelectedProduct(productId);
       if (autoNavigateEnabled) {
         setActiveTab("analysis");
@@ -22,6 +24,7 @@ const Scanner = () => {
   };
 
   const handleSelectProduct = (productId: string) => {
+    console.log("Product selected from history:", productId);
     setSelectedProduct(productId);
     setActiveTab("analysis");
   };

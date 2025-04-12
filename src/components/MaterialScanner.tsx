@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Aperture, AlertCircle, Upload, Redo, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Cleanup function for camera resources
   useEffect(() => {
     return () => {
       if (streamRef.current) {
@@ -77,7 +75,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           streamRef.current = stream;
           setIsScanning(true);
           
-          // Wait for video to be ready
           videoRef.current.onloadedmetadata = () => {
             if (videoRef.current) {
               videoRef.current.play().then(() => {
@@ -107,7 +104,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
             streamRef.current = fallbackStream;
             setIsScanning(true);
             
-            // Wait for video to be ready
             videoRef.current.onloadedmetadata = () => {
               if (videoRef.current) {
                 videoRef.current.play().then(() => {
@@ -202,7 +198,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     }
   };
 
-  // Modified to handle product id format correctly
   const analyzeImage = async (imageData: string, fileName?: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -226,20 +221,53 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           title: "Analysis Complete",
           description: "Materials analysis is now available.",
         });
-      }, 5000); // Reduced from 10000 to 5000 for faster feedback
+      }, 5000);
       
       setAnalysisTimeout(timeoutId);
       
-      // Determine the actual product ID to use (handle special cases)
-      // If productId is "external-scan", use a numeric ID instead
-      const actualProductId = (productId === "external-scan") ? "5" : productId;
+      let actualProductId = productId;
+      let productType = "";
       
-      console.log("Sending image to analyze-materials function with productId:", actualProductId);
+      if (fileName) {
+        productType = "perfume";
+        
+        if (fileName.toLowerCase().includes("bottle") || 
+            fileName.toLowerCase().includes("water")) {
+          productType = "bamboo-water-bottle";
+          actualProductId = "1";
+        } else if (fileName.toLowerCase().includes("shirt") || 
+                  fileName.toLowerCase().includes("cotton")) {
+          productType = "organic-cotton-shirt";
+          actualProductId = "2";
+        } else if (fileName.toLowerCase().includes("cream") || 
+                  fileName.toLowerCase().includes("face")) {
+          productType = "natural-face-cream";
+          actualProductId = "3";
+        } else if (fileName.toLowerCase().includes("coffee") || 
+                  fileName.toLowerCase().includes("cup")) {
+          productType = "recycled-coffee-cup";
+          actualProductId = "4";
+        } else if (fileName.toLowerCase().includes("power") || 
+                  fileName.toLowerCase().includes("bank") || 
+                  fileName.toLowerCase().includes("solar")) {
+          productType = "solar-power-bank";
+          actualProductId = "5";
+        } else {
+          productType = "perfume";
+        }
+      } else if (productId === "external-scan") {
+        productType = "perfume";
+        actualProductId = "perfume";
+      }
+      
+      console.log(`Sending image to analyze-materials function with productId: ${actualProductId}, type: ${productType}`);
+      
       const { data: scanResult, error: functionError } = await supabase.functions.invoke('analyze-materials', {
         body: { 
           image: imageData,
           productId: actualProductId,
-          fileName: fileName
+          fileName: fileName,
+          productType: productType
         }
       });
 
@@ -257,14 +285,13 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         throw new Error("Analysis failed");
       }
 
-      // Store the scan in scan history, with proper UUID handling
       try {
         const { error: dbError } = await supabase
           .from('material_scans')
           .insert({
             product_id: actualProductId,
             scan_data: imageData.substring(0, 100) + "...",
-            confidence_score: scanResult?.confidence || 0.8,
+            confidence_score: scanResult?.confidence || 0.85,
             detected_materials: scanResult?.materials?.map(m => m.name) || [],
             user_id: session.user.id
           });
@@ -306,9 +333,8 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     
     const success = await analyzeImage(imageData);
     
-    // Always consider scan successful for demo purposes
     if (success) {
-      onScanComplete(productId === "external-scan" ? "5" : productId);
+      onScanComplete(productId);
     }
   };
 
@@ -333,9 +359,8 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         setCapturedImage(imageData);
         const success = await analyzeImage(imageData, file.name);
         
-        // Always consider scan successful for demo purposes
         if (success) {
-          onScanComplete(productId === "external-scan" ? "5" : productId);
+          onScanComplete(productId);
         }
       };
       
@@ -370,7 +395,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   };
 
   const viewResults = () => {
-    onScanComplete(productId === "external-scan" ? "5" : productId);
+    onScanComplete(productId);
   };
 
   return (
@@ -526,7 +551,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         )}
       </div>
 
-      {/* Camera Modal with proper DialogDescription */}
       <Dialog open={showCameraModal} onOpenChange={(open) => {
         if (!open) stopCamera();
         setShowCameraModal(open);
@@ -540,15 +564,15 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
             <DialogClose onClick={stopCamera} className="absolute right-4 top-4" />
           </DialogHeader>
           <div className="relative aspect-video w-full bg-black">
-            {cameraInitialized ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-              />
-            ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+              style={{ display: cameraInitialized ? 'block' : 'none' }}
+            />
+            {!cameraInitialized && (
               <div className="flex items-center justify-center h-full">
                 <p className="text-white">Camera initializing...</p>
               </div>
