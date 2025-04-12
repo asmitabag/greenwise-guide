@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +30,7 @@ interface Certification {
   description: string;
 }
 
+// Fixed predefined materials data for the first 5 products
 const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
   "1": [
     {
@@ -222,37 +224,91 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
   ]
 };
 
+// Predefined certifications
+const defaultCertifications: Certification[] = [
+  {
+    id: "cert-1",
+    name: "Eco-Certified",
+    issuing_body: "Global Sustainability Council",
+    description: "Products made with environmentally responsible practices"
+  },
+  {
+    id: "cert-2",
+    name: "Recycled Content",
+    issuing_body: "Circular Economy Association",
+    description: "Contains verified recycled materials"
+  },
+  {
+    id: "cert-3",
+    name: "Biodegradable",
+    issuing_body: "Environmental Standards Organization",
+    description: "Naturally breaks down with minimal environmental impact"
+  },
+  {
+    id: "cert-4",
+    name: "Organic",
+    issuing_body: "Organic Materials Council",
+    description: "Contains organically grown materials free from synthetic chemicals"
+  }
+];
+
 const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
-  const isPredefinedProduct = ["1", "2", "3", "4", "5"].includes(productId);
+  const normalizedProductId = productId.startsWith('fc') ? productId : productId.trim();
+  const isPredefinedProduct = ["1", "2", "3", "4", "5"].includes(normalizedProductId);
   
   const { data: materials = [], isLoading: materialsLoading, error: materialsError } = useQuery({
-    queryKey: ['material-analysis', productId],
+    queryKey: ['material-analysis', normalizedProductId],
     queryFn: async () => {
-      if (isPredefinedProduct) {
-        console.log(`Using predefined materials for product ${productId}`);
-        return predefinedMaterials[productId] || [];
+      console.log(`Checking materials for product ${normalizedProductId}`);
+      
+      // Always check predefined materials first for the 5 standard products
+      if (isPredefinedProduct || ["1", "2", "3", "4", "5"].some(id => normalizedProductId.includes(id))) {
+        const productKey = ["1", "2", "3", "4", "5"].find(id => normalizedProductId.includes(id)) || normalizedProductId;
+        console.log(`Using predefined materials for product ${productKey}`);
+        return predefinedMaterials[productKey] || [];
       }
       
-      console.log(`Fetching materials for product ${productId} from Supabase`);
+      console.log(`Fetching materials for product ${normalizedProductId} from Supabase`);
       const { data, error } = await supabase
         .from('material_analysis')
         .select('*')
-        .eq('product_id', productId);
+        .eq('product_id', normalizedProductId);
       
-      if (error) throw error;
-      return data as MaterialAnalysis[];
+      if (error) {
+        console.error("Error fetching materials:", error);
+        throw error;
+      }
+      
+      // If no materials found, look for corresponding predefined materials
+      if (!data || data.length === 0) {
+        // Try to match to one of our predefined materials based on product ID pattern
+        for (const [id, materials] of Object.entries(predefinedMaterials)) {
+          if (normalizedProductId.includes(id)) {
+            console.log(`Falling back to predefined materials for similar product ${id}`);
+            return materials;
+          }
+        }
+      }
+      
+      return (data || []) as MaterialAnalysis[];
     },
   });
 
   const { data: certifications = [], isLoading: certificationsLoading } = useQuery({
     queryKey: ['certifications'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('material_certifications')
-        .select('*');
-      
-      if (error) throw error;
-      return data as Certification[];
+      try {
+        const { data, error } = await supabase
+          .from('material_certifications')
+          .select('*');
+        
+        if (error) throw error;
+        return (data || []) as Certification[];
+      } catch (error) {
+        console.error("Error fetching certifications:", error);
+        // Use default certifications as fallback
+        return defaultCertifications;
+      }
     },
   });
 
@@ -261,6 +317,7 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
   }
 
   if (materialsError) {
+    console.error("Material analysis error:", materialsError);
     return (
       <Card className="p-4 bg-red-50">
         <div className="flex items-center gap-2 text-red-600">
@@ -272,6 +329,7 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
   }
 
   if (!materials || materials.length === 0) {
+    console.log("No materials found for product:", normalizedProductId);
     return (
       <Card className="p-6">
         <div className="flex flex-col items-center justify-center py-8 text-center">

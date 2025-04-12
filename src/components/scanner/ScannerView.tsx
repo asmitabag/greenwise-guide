@@ -12,6 +12,7 @@ interface ScannerViewProps {
 const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [showScanner, setShowScanner] = useState(false);
   const [scanAttempted, setScanAttempted] = useState(false);
+  const [lastScannedProduct, setLastScannedProduct] = useState<string | null>(null);
 
   // Use a valid UUID or numeric ID format for consistent handling
   const SCAN_PRODUCT_ID = "5"; // Default to product id 5 (Solar Power Bank)
@@ -19,6 +20,8 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const handleScanComplete = (productId?: string) => {
     setScanAttempted(true);
     if (productId) {
+      // Store the last scanned product ID for the View Results button
+      setLastScannedProduct(productId);
       onScanComplete(productId);
     } else {
       setShowScanner(false);
@@ -28,6 +31,15 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const handleStartScan = () => {
     setScanAttempted(false);
     setShowScanner(true);
+  };
+
+  const handleViewResults = () => {
+    if (lastScannedProduct) {
+      onScanComplete(lastScannedProduct);
+    } else {
+      // If no scan has been done yet, use the default product
+      onScanComplete(SCAN_PRODUCT_ID);
+    }
   };
 
   return (
@@ -59,9 +71,17 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
               </Button>
               
               {scanAttempted && (
-                <p className="text-sm text-gray-500 mt-4">
-                  Your last scan was completed. View the results in the Analysis tab.
-                </p>
+                <div className="mt-6 space-y-4">
+                  <p className="text-sm text-gray-500">
+                    Your last scan was completed. View the results in the Analysis tab.
+                  </p>
+                  <Button 
+                    onClick={handleViewResults}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    View Results
+                  </Button>
+                </div>
               )}
             </div>
           </div>

@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 
 interface MaterialScannerProps {
   productId: string;
@@ -226,7 +226,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           title: "Analysis Complete",
           description: "Materials analysis is now available.",
         });
-      }, 10000);
+      }, 5000); // Reduced from 10000 to 5000 for faster feedback
       
       setAnalysisTimeout(timeoutId);
       
@@ -526,7 +526,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         )}
       </div>
 
-      {/* Camera Modal */}
+      {/* Camera Modal with proper DialogDescription */}
       <Dialog open={showCameraModal} onOpenChange={(open) => {
         if (!open) stopCamera();
         setShowCameraModal(open);
@@ -534,6 +534,9 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
         <DialogContent className="sm:max-w-md p-0 overflow-hidden">
           <DialogHeader className="p-4 border-b">
             <DialogTitle>Take a Photo</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">
+              Position the product label or ingredients list in the frame
+            </DialogDescription>
             <DialogClose onClick={stopCamera} className="absolute right-4 top-4" />
           </DialogHeader>
           <div className="relative aspect-video w-full bg-black">

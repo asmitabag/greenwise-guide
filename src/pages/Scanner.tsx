@@ -10,7 +10,7 @@ import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
 const Scanner = () => {
   const [activeTab, setActiveTab] = useState("scanner");
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(false); // Default to disabled
+  const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true); // Changed to true by default
 
   const handleScanComplete = (productId?: string) => {
     if (productId) {
