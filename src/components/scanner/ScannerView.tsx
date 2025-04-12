@@ -11,13 +11,20 @@ interface ScannerViewProps {
 
 const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [showScanner, setShowScanner] = useState(false);
+  const [scanAttempted, setScanAttempted] = useState(false);
 
   const handleScanComplete = (productId?: string) => {
+    setScanAttempted(true);
     if (productId) {
       onScanComplete(productId);
     } else {
       setShowScanner(false);
     }
+  };
+
+  const handleStartScan = () => {
+    setScanAttempted(false);
+    setShowScanner(true);
   };
 
   return (
@@ -41,12 +48,18 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
                 and provides detailed sustainability metrics.
               </p>
               <Button 
-                onClick={() => setShowScanner(true)}
+                onClick={handleStartScan}
                 className="w-full bg-eco-primary text-white"
                 size="lg"
               >
                 Start New Scan
               </Button>
+              
+              {scanAttempted && (
+                <p className="text-sm text-gray-500 mt-4">
+                  Your last scan was completed. View the results in the Analysis tab.
+                </p>
+              )}
             </div>
           </div>
         ) : (

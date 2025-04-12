@@ -112,4 +112,3 @@ export const convertCurrency = (
 export const convertToINR = (value: number): number => {
   return convertCurrency(value, "USD", "INR");
 };
-

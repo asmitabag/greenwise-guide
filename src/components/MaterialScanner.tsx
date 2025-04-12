@@ -1,11 +1,13 @@
+
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Aperture, AlertCircle, Upload, Redo } from 'lucide-react';
+import { Camera, Aperture, AlertCircle, Upload, Redo, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 
 interface MaterialScannerProps {
   productId: string;
@@ -21,6 +23,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
   const [scanSuccess, setScanSuccess] = useState(false);
   const [analysisTimeout, setAnalysisTimeout] = useState<number | null>(null);
   const [viewFinderActive, setViewFinderActive] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -46,6 +49,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       setCameraError(null);
       setIsAnalyzing(false);
       setScanSuccess(false);
+      setShowCameraModal(true);
       
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -145,6 +149,7 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
     
     setIsScanning(false);
     setViewFinderActive(false);
+    setShowCameraModal(false);
   };
 
   const captureImage = () => {
@@ -454,14 +459,6 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
                     </div>
                   )}
                 </div>
-              ) : viewFinderActive ? (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full max-h-[50vh] object-cover"
-                />
               ) : (
                 <div className="w-full h-[50vh] flex items-center justify-center bg-gray-900">
                   <p className="text-white">Camera initializing...</p>
@@ -541,6 +538,46 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
           </div>
         )}
       </div>
+
+      {/* Camera Modal */}
+      <Dialog open={showCameraModal} onOpenChange={setShowCameraModal}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>Take a Photo</DialogTitle>
+            <DialogClose onClick={stopCamera} className="absolute right-4 top-4" />
+          </DialogHeader>
+          <div className="relative aspect-video w-full bg-black">
+            {viewFinderActive ? (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-white">Camera initializing...</p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-between items-center p-4">
+            <Button
+              variant="outline"
+              onClick={stopCamera}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={captureAndAnalyze}
+              disabled={!viewFinderActive}
+              className="bg-eco-primary hover:bg-eco-accent"
+            >
+              Capture
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
