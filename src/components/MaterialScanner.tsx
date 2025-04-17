@@ -10,10 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 
 interface MaterialScannerProps {
   productId: string;
-  onScanComplete: (productId?: string) => void;
+  onScanComplete: (productId?: string, materials?: string[]) => void;
+  onMaterialsDetected?: (materials: string[]) => void;
 }
 
-const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) => {
+const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: MaterialScannerProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -283,6 +284,11 @@ const MaterialScanner = ({ productId, onScanComplete }: MaterialScannerProps) =>
       
       if (!scanResult.success) {
         throw new Error("Analysis failed");
+      }
+
+      if (scanResult?.materials && onMaterialsDetected) {
+        const materials = scanResult.materials.map((m: any) => m.name);
+        onMaterialsDetected(materials);
       }
 
       try {
