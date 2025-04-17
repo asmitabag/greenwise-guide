@@ -66,12 +66,24 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   };
 
   const handleViewResults = () => {
-    const effectiveProductId = lastScannedProduct || (detectedMaterials.length > 0 ? "plastic" : "plastic");
+    // Fix: Determine a fallback product ID if none is specified
+    const effectiveProductId = lastScannedProduct || (detectedMaterials.length > 0 ? "plastic" : "perfume");
     
-    // Force navigation to analysis tab by calling onScanComplete
-    onScanComplete(effectiveProductId);
+    // Important: Store in session storage before navigating
+    try {
+      sessionStorage.setItem('lastScannedProduct', effectiveProductId);
+      
+      if (detectedMaterials.length > 0) {
+        sessionStorage.setItem('detectedMaterials', JSON.stringify(detectedMaterials));
+      }
+    } catch (e) {
+      console.error("Error storing scan data before navigation:", e);
+    }
     
     console.log("View Results clicked, navigating with product:", effectiveProductId, "materials:", detectedMaterials);
+    
+    // Force navigation to analysis tab by calling onScanComplete with the product ID
+    onScanComplete(effectiveProductId);
     
     // Show toast for feedback
     toast({

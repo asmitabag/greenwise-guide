@@ -36,6 +36,13 @@ const Scanner = () => {
       console.log("Scan complete with product ID:", productId);
       setSelectedProduct(productId);
       
+      // Always store the current product ID in session storage
+      try {
+        sessionStorage.setItem('lastScannedProduct', productId);
+      } catch (e) {
+        console.error("Error storing product in session storage:", e);
+      }
+      
       // Force navigation to analysis tab
       setActiveTab("analysis");
       
@@ -50,6 +57,14 @@ const Scanner = () => {
   const handleSelectProduct = (productId: string) => {
     console.log("Product selected from history:", productId);
     setSelectedProduct(productId);
+    
+    // Store in session storage
+    try {
+      sessionStorage.setItem('lastScannedProduct', productId);
+    } catch (e) {
+      console.error("Error storing product from history in session storage:", e);
+    }
+    
     setActiveTab("analysis");
   };
 
