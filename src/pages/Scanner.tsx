@@ -21,10 +21,8 @@ const Scanner = () => {
       console.log("Scan complete with product ID:", productId);
       setSelectedProduct(productId);
       
-      // Auto-navigate to analysis if enabled
-      if (autoNavigateEnabled) {
-        setActiveTab("analysis");
-      }
+      // Force navigation to analysis tab
+      setActiveTab("analysis");
     }
   };
 

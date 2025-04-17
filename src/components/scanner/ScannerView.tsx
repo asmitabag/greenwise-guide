@@ -54,12 +54,17 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
 
   const handleViewResults = () => {
     if (lastScannedProduct) {
+      // For direct navigation, pass the product ID to parent component
       onScanComplete(lastScannedProduct);
+    } else if (detectedMaterials.length > 0) {
+      // If we have detected materials but no product ID, use "plastic" as default
+      onScanComplete("plastic");
     } else {
-      // If no scan has been done yet, use a default product
-      // Use "plastic" as the product ID to signal we scanned plastic
+      // Fallback for no scan yet
       onScanComplete("plastic");
     }
+    
+    console.log("View Results clicked, navigating with product:", lastScannedProduct || "plastic");
   };
 
   return (

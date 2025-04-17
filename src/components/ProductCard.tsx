@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,8 +82,10 @@ export const ProductCard = ({
     }
   };
 
+  const isPremiumEcoFriendly = sustainabilityScore > 6;
+
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in bg-white">
+    <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in bg-white ${isPremiumEcoFriendly ? 'border-green-200' : ''}`}>
       <div className="relative aspect-square overflow-hidden">
         <img
           src={image}
@@ -92,10 +93,17 @@ export const ProductCard = ({
           className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute top-2 right-2">
-          <Badge variant="secondary" className="bg-eco-primary text-white">
+          <Badge variant="secondary" className={`${sustainabilityScore > 6 ? 'bg-green-500' : sustainabilityScore > 4 ? 'bg-amber-500' : 'bg-red-500'} text-white`}>
             Score: {sustainabilityScore}/10
           </Badge>
         </div>
+        {isPremiumEcoFriendly && (
+          <div className="absolute top-2 left-2">
+            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+              Eco-Friendly
+            </Badge>
+          </div>
+        )}
       </div>
       <div className="p-4 space-y-4">
         <div>
@@ -145,12 +153,18 @@ export const ProductCard = ({
         {showMaterials && id && <MaterialAnalysis productId={id} />}
 
         <div className="flex justify-between items-center">
-          <span className="text-lg font-bold text-eco-secondary">
+          <span className={`text-lg font-bold ${isPremiumEcoFriendly ? 'text-green-700' : 'text-eco-secondary'}`}>
             {formatINR(price)}
+            {isPremiumEcoFriendly && (
+              <div className="text-xs text-green-600">Premium sustainable product</div>
+            )}
+            {!isPremiumEcoFriendly && sustainabilityScore <= 3 && (
+              <div className="text-xs text-red-600">Low sustainability score</div>
+            )}
           </span>
           <Button 
             onClick={handleAddToCart}
-            className="bg-eco-primary text-white hover:bg-eco-accent"
+            className={`${isPremiumEcoFriendly ? 'bg-green-600 hover:bg-green-700' : 'bg-eco-primary hover:bg-eco-accent'} text-white`}
             disabled={isAddingToCart}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />

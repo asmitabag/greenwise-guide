@@ -22,6 +22,38 @@ async function fetchProducts(searchTerm = '') {
   if (error) throw error;
   
   if (data) {
+    // Check for existing products and adjust their prices based on eco score
+    data.forEach(product => {
+      // Higher prices for sustainable products (eco score > 6)
+      if (product.sustainability_score > 6) {
+        // Premium pricing for sustainable products
+        if (product.title.includes("Bamboo Water Bottle") || product.title.includes("EcoCharge Solar Power Bank")) {
+          product.price = 3999;
+        } else if (product.title.includes("Organic Cotton")) {
+          product.price = 2499;
+        } else if (product.title.includes("Natural Face Cream")) {
+          product.price = 2999;
+        } else if (product.title.includes("Recycled Coffee Cup")) {
+          product.price = 1499;
+        } else {
+          // Default higher price for other sustainable products
+          product.price = 2999;
+        }
+      } else {
+        // Lower prices for less sustainable products (eco score <= 6)
+        if (product.title.includes("FastGlam Party Dress")) {
+          product.price = 999;
+        } else if (product.title.includes("SnapQuick Disposable Camera")) {
+          product.price = 599;
+        } else if (product.title.includes("TrendEye Colorful Sunglasses")) {
+          product.price = 399;
+        } else {
+          // Default lower price for other less sustainable products
+          product.price = 799;
+        }
+      }
+    });
+    
     const hasSolarPowerBank = data.some(product => product.title.includes("Solar Power Bank"));
     
     if (!hasSolarPowerBank) {
@@ -30,7 +62,7 @@ async function fetchProducts(searchTerm = '') {
         title: "EcoCharge Solar Power Bank",
         description: "Portable 20000mAh solar power bank with fast charging capabilities. Perfect for outdoor activities and emergencies.",
         image_url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
-        price: 4999,
+        price: 3999, // Higher price for eco-friendly product
         sustainability_score: 9,
         eco_features: ["recyclable", "energy-efficient", "solar-powered"],
         brand: "EcoCharge",
@@ -42,7 +74,7 @@ async function fetchProducts(searchTerm = '') {
       });
     }
     
-    // Add trendy but less eco-friendly products
+    // Add trendy but less eco-friendly products with lower prices
     const hasFastFashionDress = data.some(product => product.title.includes("FastGlam Party Dress"));
     if (!hasFastFashionDress) {
       data.push({
@@ -50,7 +82,7 @@ async function fetchProducts(searchTerm = '') {
         title: "FastGlam Party Dress",
         description: "Trendy party dress with shimmer details. Perfect for a night out on the town. Limited edition design.",
         image_url: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80",
-        price: 1499,
+        price: 999, // Cheaper price for less sustainable product
         sustainability_score: 3,
         eco_features: [],
         brand: "FastGlam",
@@ -69,7 +101,7 @@ async function fetchProducts(searchTerm = '') {
         title: "SnapQuick Disposable Camera Kit",
         description: "Set of 3 disposable cameras with flash. Perfect for parties and events. 27 exposures each.",
         image_url: "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80",
-        price: 999,
+        price: 599, // Cheaper price for less sustainable product
         sustainability_score: 2,
         eco_features: [],
         brand: "SnapQuick",
@@ -88,7 +120,7 @@ async function fetchProducts(searchTerm = '') {
         title: "TrendEye Colorful Sunglasses Set",
         description: "Set of 5 colorful plastic sunglasses in different styles. Affordable fashion accessory for every outfit.",
         image_url: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
-        price: 799,
+        price: 399, // Cheaper price for less sustainable product
         sustainability_score: 2,
         eco_features: [],
         brand: "TrendEye",
