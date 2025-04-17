@@ -2,10 +2,10 @@
 /**
  * Format a numeric value as currency
  * @param value - The numeric value to format
- * @param currency - The currency code (USD, EUR, INR, etc)
+ * @param currency - The currency code (INR, USD, EUR, etc)
  * @returns Formatted currency string
  */
-export const formatCurrency = (value: number, currency: string = "USD"): string => {
+export const formatCurrency = (value: number, currency: string = "INR"): string => {
   const formatter = new Intl.NumberFormat(getCurrencyLocale(currency), {
     style: "currency",
     currency: currency,
@@ -41,7 +41,7 @@ const getCurrencyLocale = (currency: string): string => {
     case "INR":
       return "en-IN";
     default:
-      return "en-US";
+      return "en-IN";
   }
 };
 
@@ -54,8 +54,8 @@ const getCurrencyLocale = (currency: string): string => {
  */
 export const convertCurrency = (
   value: number, 
-  fromCurrency: string = "USD", 
-  toCurrency: string = "USD"
+  fromCurrency: string = "INR", 
+  toCurrency: string = "INR"
 ): number => {
   // This would typically call an exchange rate API
   // For now, we'll use hardcoded approximate rates

@@ -2,11 +2,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Leaf, Recycle, Droplets, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
+import { Leaf, Recycle, Droplets, ShoppingCart, ChevronDown, ChevronUp, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import MaterialAnalysis from "@/components/MaterialAnalysis";
 import { useState } from "react";
+import { formatINR } from "@/utils/currency";
 
 interface ProductCardProps {
   title: string;
@@ -145,7 +146,7 @@ export const ProductCard = ({
 
         <div className="flex justify-between items-center">
           <span className="text-lg font-bold text-eco-secondary">
-            ${price.toFixed(2)}
+            {formatINR(price)}
           </span>
           <Button 
             onClick={handleAddToCart}

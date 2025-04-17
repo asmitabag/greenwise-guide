@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
 import { Categories } from "@/components/Categories";
-import { UserRound, ShoppingCart, Camera, Search } from "lucide-react";
+import { UserRound, ShoppingCart, Camera, Search, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -30,15 +30,72 @@ async function fetchProducts(searchTerm = '') {
         title: "EcoCharge Solar Power Bank",
         description: "Portable 20000mAh solar power bank with fast charging capabilities. Perfect for outdoor activities and emergencies.",
         image_url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
-        price: 49.99,
+        price: 4999,
         sustainability_score: 9,
         eco_features: ["recyclable", "energy-efficient", "solar-powered"],
         brand: "EcoCharge",
         category: "Electronics",
-        // Adding the missing required properties:
         carbon_footprint: 5.2,
         created_at: new Date().toISOString(),
-        materials: ["recycled plastic", "silicon solar panels", "lithium-ion battery"],
+        materials: ["recycled aluminum", "silicon solar panels", "lithium-ion battery"],
+        seller_id: null
+      });
+    }
+    
+    // Add trendy but less eco-friendly products
+    const hasFastFashionDress = data.some(product => product.title.includes("FastGlam Party Dress"));
+    if (!hasFastFashionDress) {
+      data.push({
+        id: "fast-fashion-dress-001",
+        title: "FastGlam Party Dress",
+        description: "Trendy party dress with shimmer details. Perfect for a night out on the town. Limited edition design.",
+        image_url: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80",
+        price: 1499,
+        sustainability_score: 3,
+        eco_features: [],
+        brand: "FastGlam",
+        category: "Clothing",
+        carbon_footprint: 25.8,
+        created_at: new Date().toISOString(),
+        materials: ["polyester", "plastic sequins", "synthetic fiber"],
+        seller_id: null
+      });
+    }
+    
+    const hasDisposableCameraKit = data.some(product => product.title.includes("SnapQuick Disposable Camera Kit"));
+    if (!hasDisposableCameraKit) {
+      data.push({
+        id: "disposable-camera-001",
+        title: "SnapQuick Disposable Camera Kit",
+        description: "Set of 3 disposable cameras with flash. Perfect for parties and events. 27 exposures each.",
+        image_url: "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80",
+        price: 999,
+        sustainability_score: 2,
+        eco_features: [],
+        brand: "SnapQuick",
+        category: "Electronics",
+        carbon_footprint: 18.6,
+        created_at: new Date().toISOString(),
+        materials: ["plastic", "electronic components", "batteries", "photographic chemicals"],
+        seller_id: null
+      });
+    }
+    
+    const hasTrendyPlasticGlasses = data.some(product => product.title.includes("TrendEye Colorful Sunglasses Set"));
+    if (!hasTrendyPlasticGlasses) {
+      data.push({
+        id: "plastic-glasses-001",
+        title: "TrendEye Colorful Sunglasses Set",
+        description: "Set of 5 colorful plastic sunglasses in different styles. Affordable fashion accessory for every outfit.",
+        image_url: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
+        price: 799,
+        sustainability_score: 2,
+        eco_features: [],
+        brand: "TrendEye",
+        category: "Accessories",
+        carbon_footprint: 12.4,
+        created_at: new Date().toISOString(),
+        materials: ["acrylic plastic", "metal hinges", "synthetic dyes"],
         seller_id: null
       });
     }

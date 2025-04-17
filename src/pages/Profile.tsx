@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import OrderHistorySection from "@/components/profile/OrderHistorySection";
-import { Leaf, ShoppingBag, Settings, LogOut } from "lucide-react";
+import { Leaf, ShoppingBag, Settings, LogOut, Home } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -38,6 +38,62 @@ const Profile = () => {
     },
     enabled: !!user?.id
   });
+  
+  // Fetch purchase history to calculate eco score
+  const { data: purchases } = useQuery({
+    queryKey: ['purchases', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('*, products:product_id(sustainability_score)')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id
+  });
+  
+  // Calculate and update eco score based on purchase history
+  useEffect(() => {
+    const updateEcoScore = async () => {
+      if (!user?.id || !purchases?.length || !profile) return;
+      
+      // Calculate average sustainability score from purchases
+      let totalScore = 0;
+      let totalItems = 0;
+      
+      purchases.forEach(purchase => {
+        if (purchase.products?.sustainability_score) {
+          totalScore += purchase.products.sustainability_score * purchase.quantity;
+          totalItems += purchase.quantity;
+        }
+      });
+      
+      // Calculate new eco score (10-100 scale)
+      const averageScore = totalItems > 0 ? (totalScore / totalItems) * 10 : 0;
+      
+      // Only update if the score would increase (to avoid penalizing users)
+      if (averageScore > 0 && (profile.eco_score === 0 || averageScore > profile.eco_score)) {
+        // Update user profile with new eco score
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            eco_score: Math.round(averageScore),
+            sustainability_points: totalItems * 5 // 5 points per item purchased
+          })
+          .eq('id', user.id);
+        
+        if (error) {
+          console.error("Error updating eco score:", error);
+        }
+      }
+    };
+    
+    updateEcoScore();
+  }, [user?.id, purchases, profile]);
   
   useEffect(() => {
     // Check if user is authenticated
@@ -72,7 +128,15 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-eco-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-eco-primary">My Profile</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-eco-primary">My Profile</h1>
+          <Link to="/">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Home size={18} />
+              <span>Back to Home</span>
+            </Button>
+          </Link>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar */}
@@ -206,6 +270,17 @@ const Profile = () => {
                         <p className="text-xs text-gray-500 mt-2">
                           Your eco-score increases as you purchase sustainable products and engage with eco-friendly features.
                         </p>
+                        
+                        {/* Purchase summary */}
+                        {purchases && purchases.length > 0 && (
+                          <div className="mt-4 pt-4 border-t">
+                            <p className="text-sm font-medium mb-2">Purchase Impact</p>
+                            <div className="text-xs text-gray-700">
+                              <p>You've purchased {purchases.length} sustainable products!</p>
+                              <p className="mt-1">Each eco-friendly purchase contributes to your sustainability score.</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>

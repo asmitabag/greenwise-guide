@@ -13,16 +13,34 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [showScanner, setShowScanner] = useState(false);
   const [scanAttempted, setScanAttempted] = useState(false);
   const [lastScannedProduct, setLastScannedProduct] = useState<string | null>(null);
+  const [detectedMaterials, setDetectedMaterials] = useState<string[]>([]);
 
-  // Use a valid UUID or numeric ID format for consistent handling
-  const SCAN_PRODUCT_ID = "5"; // Default to product id 5 (Solar Power Bank)
+  // Handle materials detected from the scanner
+  const handleMaterialsDetected = (materials: string[]) => {
+    console.log("Materials detected:", materials);
+    setDetectedMaterials(materials);
+  };
 
-  const handleScanComplete = (productId?: string) => {
+  // Enhanced scan complete handler that sets product ID and navigates to analysis
+  const handleScanComplete = (productId?: string, materials?: string[]) => {
     setScanAttempted(true);
     if (productId) {
-      // Store the last scanned product ID for the View Results button
+      console.log("Scan complete with product ID:", productId);
       setLastScannedProduct(productId);
-      onScanComplete(productId);
+      
+      if (materials && materials.length > 0) {
+        setDetectedMaterials(materials);
+      }
+      
+      // Store the scan information in session storage for the analysis view
+      if (productId && materials) {
+        try {
+          sessionStorage.setItem('lastScannedProduct', productId);
+          sessionStorage.setItem('detectedMaterials', JSON.stringify(materials));
+        } catch (e) {
+          console.error("Error storing scan data:", e);
+        }
+      }
     } else {
       setShowScanner(false);
     }
@@ -30,6 +48,7 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
 
   const handleStartScan = () => {
     setScanAttempted(false);
+    setDetectedMaterials([]);
     setShowScanner(true);
   };
 
@@ -37,8 +56,9 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
     if (lastScannedProduct) {
       onScanComplete(lastScannedProduct);
     } else {
-      // If no scan has been done yet, use the default product
-      onScanComplete(SCAN_PRODUCT_ID);
+      // If no scan has been done yet, use a default product
+      // Use "plastic" as the product ID to signal we scanned plastic
+      onScanComplete("plastic");
     }
   };
 
@@ -72,6 +92,18 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
               
               {scanAttempted && (
                 <div className="mt-6 space-y-4">
+                  {detectedMaterials.length > 0 && (
+                    <div className="bg-gray-50 p-3 rounded border">
+                      <h4 className="font-medium text-sm mb-2">Detected Materials:</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {detectedMaterials.map((material, index) => (
+                          <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {material}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <p className="text-sm text-gray-500">
                     Your last scan was completed. View the results in the Analysis tab.
                   </p>
@@ -87,8 +119,9 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
           </div>
         ) : (
           <MaterialScanner 
-            productId={SCAN_PRODUCT_ID} 
+            productId={lastScannedProduct || "external-scan"} 
             onScanComplete={handleScanComplete}
+            onMaterialsDetected={handleMaterialsDetected}
           />
         )}
       </CardContent>

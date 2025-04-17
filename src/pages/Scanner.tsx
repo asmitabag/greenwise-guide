@@ -1,11 +1,14 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ScannerView from "@/components/scanner/ScannerView";
 import ScanHistoryView from "@/components/scanner/ScanHistoryView";
 import ImpactChartView from "@/components/scanner/ImpactChartView";
 import MaterialBreakdownView from "@/components/scanner/MaterialBreakdownView";
 import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
+import { Button } from "@/components/ui/button";
+import { Home } from "lucide-react";
 
 const Scanner = () => {
   const [activeTab, setActiveTab] = useState("scanner");
@@ -43,6 +46,16 @@ const Scanner = () => {
   return (
     <div className="min-h-screen bg-eco-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-eco-primary">Material Scanner</h1>
+          <Link to="/">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Home size={18} />
+              <span>Back to Home</span>
+            </Button>
+          </Link>
+        </div>
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 mb-4">
             <TabsTrigger value="scanner">Scanner</TabsTrigger>
