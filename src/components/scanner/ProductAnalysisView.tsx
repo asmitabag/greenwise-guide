@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductAnalysisViewProps {
   productId: string;
@@ -86,6 +87,7 @@ const productMaterialMappings = {
 const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [detectedMaterials, setDetectedMaterials] = useState<string[]>([]);
+  const { toast } = useToast();
   
   // Try to get detected materials from session storage
   useEffect(() => {
@@ -96,15 +98,38 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
         if (Array.isArray(parsedMaterials) && parsedMaterials.length > 0) {
           setDetectedMaterials(parsedMaterials);
           console.log("Retrieved materials from session storage:", parsedMaterials);
+          
+          // Show toast to confirm materials were loaded
+          toast({
+            title: "Materials Loaded",
+            description: `Analyzing ${parsedMaterials.join(", ")}`,
+          });
         }
+      }
+      
+      // Also try to get the last scanned product
+      const storedProductId = sessionStorage.getItem('lastScannedProduct');
+      if (storedProductId && storedProductId !== productId) {
+        console.log("Using product ID from session storage instead of prop:", storedProductId);
+        productId = storedProductId;
       }
     } catch (e) {
       console.error("Error retrieving materials from session storage:", e);
     }
-  }, []);
+  }, [productId, toast]);
+  
+  // Check if OCR detected a material with "plastic" - handle differently
+  const hasDetectedPlastic = detectedMaterials.some(m => 
+    m.toLowerCase().includes('plastic')
+  );
   
   // Determine product key for material mapping
   const determineProductKey = (id: string): string => {
+    // If OCR detected plastic, use the plastic product mapping
+    if (hasDetectedPlastic) {
+      return "plastic";
+    }
+    
     // Direct matches for product IDs
     if (id === "1" || id === "2" || id === "3" || id === "4" || id === "5" || id === "perfume" || id === "plastic") {
       return id;
@@ -131,13 +156,20 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     }
     
     // Default for unknown products
-    return detectedMaterials.includes("plastic") ? "plastic" : "5";
+    return "plastic";
   };
   
-  const productKey = determineProductKey(productId);
+  // If we have session-stored product ID, use it
+  const effectiveProductId = sessionStorage.getItem('lastScannedProduct') || productId;
+  const productKey = determineProductKey(effectiveProductId);
   
   // Get product description for display
   const determineProductName = (id: string): string => {
+    // If OCR detected plastic, override the name
+    if (hasDetectedPlastic) {
+      return "Plastic Product";
+    }
+    
     // Check if we have a direct match in our description mapping
     if (productDescriptions[id as keyof typeof productDescriptions]) {
       return productDescriptions[id as keyof typeof productDescriptions];
@@ -160,7 +192,7 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     return "Unknown Product";
   };
   
-  let productName = determineProductName(productId);
+  let productName = determineProductName(effectiveProductId);
   
   // If we have detected materials, override the product name
   if (detectedMaterials.length > 0) {
@@ -168,12 +200,12 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
   }
   
   const { data: scanHistory, isLoading } = useQuery({
-    queryKey: ['scan-history', productId],
+    queryKey: ['scan-history', effectiveProductId],
     queryFn: async () => {
       const { data } = await supabase
         .from('material_scans')
         .select('*')
-        .eq('product_id', productId)
+        .eq('product_id', effectiveProductId)
         .order('created_at', { ascending: false })
         .limit(1);
       
@@ -183,6 +215,9 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
   
   // Generate analysis result based on product key
   useEffect(() => {
+    console.log("Generating analysis for product key:", productKey);
+    console.log("Detected materials:", detectedMaterials);
+    
     // Get material data from our mappings
     let materials = productMaterialMappings[productKey as keyof typeof productMaterialMappings] || [];
     

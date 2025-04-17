@@ -4,6 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter }
 import MaterialScanner from "@/components/MaterialScanner";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScannerViewProps {
   onScanComplete: (productId?: string) => void;
@@ -14,11 +15,19 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [scanAttempted, setScanAttempted] = useState(false);
   const [lastScannedProduct, setLastScannedProduct] = useState<string | null>(null);
   const [detectedMaterials, setDetectedMaterials] = useState<string[]>([]);
+  const { toast } = useToast();
 
   // Handle materials detected from the scanner
   const handleMaterialsDetected = (materials: string[]) => {
     console.log("Materials detected:", materials);
     setDetectedMaterials(materials);
+    
+    // Save detected materials to session storage for use in analysis view
+    try {
+      sessionStorage.setItem('detectedMaterials', JSON.stringify(materials));
+    } catch (e) {
+      console.error("Error storing materials in session storage:", e);
+    }
   };
 
   // Enhanced scan complete handler that sets product ID and navigates to analysis
@@ -30,16 +39,20 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
       
       if (materials && materials.length > 0) {
         setDetectedMaterials(materials);
+        
+        // Store the materials in session storage for the analysis view
+        try {
+          sessionStorage.setItem('detectedMaterials', JSON.stringify(materials));
+        } catch (e) {
+          console.error("Error storing materials in session storage:", e);
+        }
       }
       
       // Store the scan information in session storage for the analysis view
-      if (productId && materials) {
-        try {
-          sessionStorage.setItem('lastScannedProduct', productId);
-          sessionStorage.setItem('detectedMaterials', JSON.stringify(materials));
-        } catch (e) {
-          console.error("Error storing scan data:", e);
-        }
+      try {
+        sessionStorage.setItem('lastScannedProduct', productId);
+      } catch (e) {
+        console.error("Error storing scan data:", e);
       }
     } else {
       setShowScanner(false);
@@ -53,18 +66,18 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   };
 
   const handleViewResults = () => {
-    if (lastScannedProduct) {
-      // For direct navigation, pass the product ID to parent component
-      onScanComplete(lastScannedProduct);
-    } else if (detectedMaterials.length > 0) {
-      // If we have detected materials but no product ID, use "plastic" as default
-      onScanComplete("plastic");
-    } else {
-      // Fallback for no scan yet
-      onScanComplete("plastic");
-    }
+    const effectiveProductId = lastScannedProduct || (detectedMaterials.length > 0 ? "plastic" : "plastic");
     
-    console.log("View Results clicked, navigating with product:", lastScannedProduct || "plastic");
+    // Force navigation to analysis tab by calling onScanComplete
+    onScanComplete(effectiveProductId);
+    
+    console.log("View Results clicked, navigating with product:", effectiveProductId, "materials:", detectedMaterials);
+    
+    // Show toast for feedback
+    toast({
+      title: "Navigating to Analysis",
+      description: "Showing analysis for detected materials",
+    });
   };
 
   return (

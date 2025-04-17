@@ -6,13 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import OrderHistorySection from "@/components/profile/OrderHistorySection";
 import { Leaf, ShoppingBag, Settings, LogOut, Home } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("account");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const { data: user } = useQuery({
     queryKey: ['user'],
@@ -22,7 +25,7 @@ const Profile = () => {
     }
   });
   
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, refetch: refetchProfile } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -40,7 +43,7 @@ const Profile = () => {
   });
   
   // Fetch purchase history to calculate eco score
-  const { data: purchases } = useQuery({
+  const { data: purchases, isSuccess: purchasesLoaded } = useQuery({
     queryKey: ['purchases', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -56,44 +59,82 @@ const Profile = () => {
     enabled: !!user?.id
   });
   
-  // Calculate and update eco score based on purchase history
+  // Calculate and update eco score based on purchase history - improved
   useEffect(() => {
     const updateEcoScore = async () => {
-      if (!user?.id || !purchases?.length || !profile) return;
+      if (!user?.id || !purchasesLoaded || !profile) return;
+      
+      console.log("Updating eco score based on purchases:", purchases);
       
       // Calculate average sustainability score from purchases
       let totalScore = 0;
       let totalItems = 0;
       
-      purchases.forEach(purchase => {
-        if (purchase.products?.sustainability_score) {
-          totalScore += purchase.products.sustainability_score * purchase.quantity;
-          totalItems += purchase.quantity;
-        }
-      });
+      // Make sure purchases exists and has elements
+      if (purchases && purchases.length > 0) {
+        purchases.forEach(purchase => {
+          if (purchase.products?.sustainability_score) {
+            const score = Number(purchase.products.sustainability_score);
+            const quantity = Number(purchase.quantity);
+            
+            if (!isNaN(score) && !isNaN(quantity)) {
+              totalScore += score * quantity;
+              totalItems += quantity;
+            }
+          }
+        });
+      }
       
       // Calculate new eco score (10-100 scale)
-      const averageScore = totalItems > 0 ? (totalScore / totalItems) * 10 : 0;
+      let averageScore = totalItems > 0 ? Math.round((totalScore / totalItems) * 10) : 0;
       
-      // Only update if the score would increase (to avoid penalizing users)
+      // Ensure score is at least 10 if there are purchases
+      if (totalItems > 0 && averageScore < 10) {
+        averageScore = 10;
+      }
+      
+      console.log("Calculated eco score:", {
+        totalScore,
+        totalItems,
+        averageScore,
+        currentScore: profile.eco_score
+      });
+      
+      // Update user profile with new eco score
       if (averageScore > 0 && (profile.eco_score === 0 || averageScore > profile.eco_score)) {
-        // Update user profile with new eco score
+        const sustainabilityPoints = totalItems * 5; // 5 points per item purchased
+        
+        console.log("Updating profile with new score:", averageScore, "and points:", sustainabilityPoints);
+        
         const { error } = await supabase
           .from('profiles')
           .update({
-            eco_score: Math.round(averageScore),
-            sustainability_points: totalItems * 5 // 5 points per item purchased
+            eco_score: averageScore,
+            sustainability_points: sustainabilityPoints
           })
           .eq('id', user.id);
         
         if (error) {
           console.error("Error updating eco score:", error);
+          toast({
+            title: "Error",
+            description: "Failed to update sustainability score",
+            variant: "destructive"
+          });
+        } else {
+          // Force refetch profile to show updated score
+          queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
+          
+          toast({
+            title: "Profile Updated",
+            description: "Your sustainability score has been updated based on your purchases",
+          });
         }
       }
     };
     
     updateEcoScore();
-  }, [user?.id, purchases, profile]);
+  }, [user?.id, purchases, profile, purchasesLoaded, queryClient, toast]);
   
   useEffect(() => {
     // Check if user is authenticated
@@ -124,6 +165,10 @@ const Profile = () => {
       </div>
     );
   }
+  
+  // Force score to be number type and handle edge cases
+  const ecoScore = profile?.eco_score ? Number(profile.eco_score) : 0;
+  const sustainabilityPoints = profile?.sustainability_points ? Number(profile.sustainability_points) : 0;
   
   return (
     <div className="min-h-screen bg-eco-background p-4 sm:p-8">
@@ -158,11 +203,11 @@ const Profile = () => {
                     <div className="flex justify-center items-center gap-1 text-green-700">
                       <Leaf className="h-4 w-4" />
                       <span className="text-sm font-medium">
-                        Eco Score: {profile?.eco_score || 0}/100
+                        Eco Score: {ecoScore}/100
                       </span>
                     </div>
                     <p className="text-xs text-green-600 mt-1">
-                      {profile?.sustainability_points || 0} sustainability points
+                      {sustainabilityPoints} sustainability points
                     </p>
                   </div>
                 </div>
@@ -258,13 +303,13 @@ const Profile = () => {
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium">Eco Score</span>
                           <span className="text-sm font-medium text-green-600">
-                            {profile?.eco_score || 0}/100
+                            {ecoScore}/100
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
                           <div 
                             className="bg-green-500 h-full"
-                            style={{ width: `${profile?.eco_score || 0}%` }}
+                            style={{ width: `${ecoScore}%` }}
                           ></div>
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
@@ -278,6 +323,15 @@ const Profile = () => {
                             <div className="text-xs text-gray-700">
                               <p>You've purchased {purchases.length} sustainable products!</p>
                               <p className="mt-1">Each eco-friendly purchase contributes to your sustainability score.</p>
+                              {purchases.length > 0 && ecoScore === 0 && (
+                                <Button
+                                  onClick={() => refetchProfile()}
+                                  className="mt-2 text-xs bg-green-600 hover:bg-green-700 text-white"
+                                  size="sm"
+                                >
+                                  Refresh Score
+                                </Button>
+                              )}
                             </div>
                           </div>
                         )}

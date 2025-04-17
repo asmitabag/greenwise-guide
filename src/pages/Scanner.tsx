@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ScannerView from "@/components/scanner/ScannerView";
@@ -9,11 +9,26 @@ import MaterialBreakdownView from "@/components/scanner/MaterialBreakdownView";
 import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Scanner = () => {
   const [activeTab, setActiveTab] = useState("scanner");
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [autoNavigateEnabled, setAutoNavigateEnabled] = useState(true); // Default to true
+  const { toast } = useToast();
+
+  // Effect to restore state from session storage when component mounts
+  useEffect(() => {
+    try {
+      const storedProduct = sessionStorage.getItem('lastScannedProduct');
+      if (storedProduct) {
+        setSelectedProduct(storedProduct);
+        console.log("Restored product ID from session storage:", storedProduct);
+      }
+    } catch (e) {
+      console.error("Error retrieving product from session storage:", e);
+    }
+  }, []);
 
   // Enhanced scan complete handler that sets product ID and navigates to analysis
   const handleScanComplete = (productId?: string) => {
@@ -23,6 +38,11 @@ const Scanner = () => {
       
       // Force navigation to analysis tab
       setActiveTab("analysis");
+      
+      toast({
+        title: "Scan Complete",
+        description: "Navigating to analysis results",
+      });
     }
   };
 
