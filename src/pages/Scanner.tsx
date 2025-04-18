@@ -3,9 +3,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ScannerView from "@/components/scanner/ScannerView";
-import ScanHistoryView from "@/components/scanner/ScanHistoryView";
-import ImpactChartView from "@/components/scanner/ImpactChartView";
-import MaterialBreakdownView from "@/components/scanner/MaterialBreakdownView";
 import ProductAnalysisView from "@/components/scanner/ProductAnalysisView";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
@@ -53,25 +50,10 @@ const Scanner = () => {
     }
   };
 
-  // Select a product from history and navigate to its analysis
-  const handleSelectProduct = (productId: string) => {
-    console.log("Product selected from history:", productId);
-    setSelectedProduct(productId);
-    
-    // Store in session storage
-    try {
-      sessionStorage.setItem('lastScannedProduct', productId);
-    } catch (e) {
-      console.error("Error storing product from history in session storage:", e);
-    }
-    
-    setActiveTab("analysis");
-  };
-
   // Handle back navigation from analysis with auto-navigation awareness
-  const handleBackToHistory = () => {
+  const handleBackToScanner = () => {
     if (autoNavigateEnabled) {
-      setActiveTab("history");
+      setActiveTab("scanner");
     }
     // When auto-navigation is disabled, user controls navigation manually
   };
@@ -90,11 +72,8 @@ const Scanner = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="scanner">Scanner</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="impact">Impact</TabsTrigger>
-            <TabsTrigger value="breakdown">Materials</TabsTrigger>
             <TabsTrigger value="analysis" disabled={!selectedProduct}>
               Analysis
             </TabsTrigger>
@@ -104,26 +83,11 @@ const Scanner = () => {
             <ScannerView onScanComplete={handleScanComplete} />
           </TabsContent>
 
-          <TabsContent value="history">
-            <ScanHistoryView 
-              onSelectProduct={handleSelectProduct} 
-              onStartNewScan={() => setActiveTab("scanner")} 
-            />
-          </TabsContent>
-
-          <TabsContent value="impact">
-            <ImpactChartView />
-          </TabsContent>
-
-          <TabsContent value="breakdown">
-            <MaterialBreakdownView />
-          </TabsContent>
-
           <TabsContent value="analysis">
             {selectedProduct && (
               <ProductAnalysisView 
                 productId={selectedProduct} 
-                onBack={handleBackToHistory} 
+                onBack={handleBackToScanner} 
               />
             )}
           </TabsContent>

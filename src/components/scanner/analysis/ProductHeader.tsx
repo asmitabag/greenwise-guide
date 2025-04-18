@@ -12,6 +12,13 @@ interface ProductHeaderProps {
 const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }: ProductHeaderProps) => {
   const productImage = productType ? getProductImage(productType) : null;
   
+  // Determine eco score color based on the score
+  const getEcoScoreColor = (score: number) => {
+    if (score > 7) return 'bg-green-500 text-white';
+    if (score > 4) return 'bg-amber-500 text-white';
+    return 'bg-red-500 text-white';
+  };
+  
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div className="flex gap-4 items-center">
@@ -39,7 +46,7 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
         </div>
       </div>
       <div>
-        <Badge className={`${ecoScore > 7 ? 'bg-green-500' : ecoScore > 4 ? 'bg-amber-500' : 'bg-red-500'} text-white`}>
+        <Badge className={getEcoScoreColor(ecoScore)}>
           Eco Score: {ecoScore.toFixed(1)}/10
         </Badge>
       </div>
