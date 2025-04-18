@@ -25,6 +25,7 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
   const [analysisTimeout, setAnalysisTimeout] = useState<number | null>(null);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [cameraInitialized, setCameraInitialized] = useState(false);
+  const [detectedMaterials, setDetectedMaterials] = useState<string[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
 
@@ -83,8 +84,19 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
       clearTimeout(timeoutId);
       setAnalysisTimeout(null);
 
-      if (result.success && result.materials && onMaterialsDetected) {
-        onMaterialsDetected(result.materials);
+      if (result.success && result.materials) {
+        setDetectedMaterials(result.materials);
+        
+        if (onMaterialsDetected) {
+          onMaterialsDetected(result.materials);
+        }
+        
+        // Store detected materials in session storage for analysis view
+        try {
+          sessionStorage.setItem('detectedMaterials', JSON.stringify(result.materials));
+        } catch (e) {
+          console.error("Error storing materials in session storage:", e);
+        }
       }
 
       toast({
@@ -94,6 +106,16 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
       
       setScanSuccess(true);
       setIsAnalyzing(false);
+      
+      // Store the product ID in session storage
+      if (result.actualProductId) {
+        try {
+          sessionStorage.setItem('lastScannedProduct', result.actualProductId);
+        } catch (e) {
+          console.error("Error storing product ID in session storage:", e);
+        }
+      }
+      
       return result.success;
     } catch (error) {
       console.error('Analysis error:', error);
@@ -115,7 +137,9 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
     const success = await processImage(imageData);
     
     if (success) {
-      onScanComplete(productId);
+      // We need to get the product ID from the analysis result
+      const effectiveProductId = sessionStorage.getItem('lastScannedProduct') || productId;
+      onScanComplete(effectiveProductId, detectedMaterials);
     }
   };
 
@@ -132,7 +156,9 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
         const success = await processImage(imageData, file.name);
         
         if (success) {
-          onScanComplete(productId);
+          // We need to get the product ID from the analysis result
+          const effectiveProductId = sessionStorage.getItem('lastScannedProduct') || productId;
+          onScanComplete(effectiveProductId, detectedMaterials);
         }
       };
       
@@ -166,7 +192,12 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
   };
 
   const viewResults = () => {
-    onScanComplete(productId);
+    // Get the effective product ID from session storage if available
+    const effectiveProductId = sessionStorage.getItem('lastScannedProduct') || productId;
+    console.log("View Results clicked with product ID:", effectiveProductId);
+    
+    // Pass any detected materials as well
+    onScanComplete(effectiveProductId, detectedMaterials);
   };
 
   return (
@@ -176,7 +207,7 @@ const MaterialScanner = ({ productId, onScanComplete, onMaterialsDetected }: Mat
           onStartCamera={startCamera}
           onFileSelected={handleFileSelected}
           cameraError={cameraError}
-          detectedMaterials={[]}
+          detectedMaterials={detectedMaterials}
           scanAttempted={scanSuccess}
           onViewResults={viewResults}
         />

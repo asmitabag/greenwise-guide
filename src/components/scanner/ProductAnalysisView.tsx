@@ -22,6 +22,7 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     materialsLoading,
     materialsError,
     productName,
+    productType
   } = useProductAnalysis(productId);
 
   if (materialsLoading) {
@@ -101,6 +102,7 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
         <ProductHeader 
           productName={productName}
           ecoScore={overallEcoScore}
+          productType={productType}
           detectedMaterials={detectedMaterials}
         />
       </CardHeader>

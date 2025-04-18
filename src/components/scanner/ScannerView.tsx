@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import MaterialScanner from "@/components/MaterialScanner";
 import { Camera } from "lucide-react";
@@ -17,6 +17,25 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   const [detectedMaterials, setDetectedMaterials] = useState<string[]>([]);
   const { toast } = useToast();
 
+  // Load initial state from session storage
+  useEffect(() => {
+    try {
+      const storedProduct = sessionStorage.getItem('lastScannedProduct');
+      const storedMaterials = sessionStorage.getItem('detectedMaterials');
+      
+      if (storedProduct) {
+        setLastScannedProduct(storedProduct);
+        setScanAttempted(true);
+      }
+      
+      if (storedMaterials) {
+        setDetectedMaterials(JSON.parse(storedMaterials));
+      }
+    } catch (error) {
+      console.error("Error loading from session storage:", error);
+    }
+  }, []);
+
   // Handle materials detected from the scanner
   const handleMaterialsDetected = (materials: string[]) => {
     console.log("Materials detected:", materials);
@@ -33,6 +52,7 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
   // Enhanced scan complete handler that sets product ID and navigates to analysis
   const handleScanComplete = (productId?: string, materials?: string[]) => {
     setScanAttempted(true);
+    
     if (productId) {
       console.log("Scan complete with product ID:", productId);
       setLastScannedProduct(productId);
@@ -54,9 +74,9 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
       } catch (e) {
         console.error("Error storing scan data:", e);
       }
-    } else {
-      setShowScanner(false);
-    }
+    } 
+    
+    setShowScanner(false);
   };
 
   const handleStartScan = () => {
@@ -67,7 +87,13 @@ const ScannerView = ({ onScanComplete }: ScannerViewProps) => {
 
   const handleViewResults = () => {
     // Fix: Determine a fallback product ID if none is specified
-    const effectiveProductId = lastScannedProduct || (detectedMaterials.length > 0 ? "plastic" : "perfume");
+    const effectiveProductId = lastScannedProduct || (detectedMaterials.some(m => m.toLowerCase().includes('alcohol') || m.toLowerCase().includes('fragrance')) ? "perfume" : 
+                              detectedMaterials.some(m => m.toLowerCase().includes('bamboo')) ? "1" :
+                              detectedMaterials.some(m => m.toLowerCase().includes('cotton')) ? "2" :
+                              detectedMaterials.some(m => m.toLowerCase().includes('cream') || m.toLowerCase().includes('aloe')) ? "3" :
+                              detectedMaterials.some(m => m.toLowerCase().includes('paper')) ? "4" :
+                              detectedMaterials.some(m => m.toLowerCase().includes('solar') || m.toLowerCase().includes('lithium')) ? "5" : 
+                              "perfume");
     
     // Important: Store in session storage before navigating
     try {

@@ -6,16 +6,22 @@ import { determineProductKey, productMaterialMappings, productDescriptions, dete
 export const useProductAnalysis = (productId: string) => {
   const normalizedProductId = productId.startsWith('fc') ? productId : productId.trim();
   const productType = determineProductKey(normalizedProductId);
-  const hasDetectedPlastic = false; // This should be determined from session storage
+  
+  // Get detected plastic from session storage if available
+  const detectedMaterials = sessionStorage.getItem('detectedMaterials') 
+    ? JSON.parse(sessionStorage.getItem('detectedMaterials')!) 
+    : [];
+  const hasDetectedPlastic = detectedMaterials.some((m: string) => 
+    m.toLowerCase().includes('plastic'));
 
   const { data: materials = [], isLoading: materialsLoading, error: materialsError } = useQuery({
     queryKey: ['material-analysis', normalizedProductId],
     queryFn: async () => {
       console.log(`Checking materials for product ${normalizedProductId}, determined type: ${productType}`);
       
-      if (predefinedMaterials[productType]) {
+      if (productMaterialMappings[productType]) {
         console.log(`Using predefined materials for product type ${productType}`);
-        return predefinedMaterials[productType];
+        return productMaterialMappings[productType];
       }
       
       const { data, error } = await supabase
@@ -29,12 +35,12 @@ export const useProductAnalysis = (productId: string) => {
       }
       
       if (!data || data.length === 0) {
-        for (const [key, value] of Object.entries(predefinedMaterials)) {
+        for (const [key, value] of Object.entries(productMaterialMappings)) {
           if (normalizedProductId.toLowerCase().includes(key.toLowerCase())) {
             return value;
           }
         }
-        return predefinedMaterials["perfume"];
+        return productMaterialMappings["perfume"];
       }
       
       return data;
@@ -98,5 +104,3 @@ const defaultCertifications = [
     description: "Contains organically grown materials free from synthetic chemicals"
   }
 ];
-
-const predefinedMaterials = productMaterialMappings;
