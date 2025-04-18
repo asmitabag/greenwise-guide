@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { determineProductKey, productMaterialMappings, productDescriptions } from "../utils/product-utils";
+import { determineProductKey, productMaterialMappings, productDescriptions, determineProductName } from "../utils/product-utils";
 
 export const useProductAnalysis = (productId: string) => {
   const normalizedProductId = productId.startsWith('fc') ? productId : productId.trim();

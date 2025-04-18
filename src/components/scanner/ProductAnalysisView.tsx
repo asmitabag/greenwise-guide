@@ -1,7 +1,7 @@
 
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft, Home, AlertCircle, Leaf } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProductAnalysis } from "./hooks/useProductAnalysis";
 import ProductHeader from "./analysis/ProductHeader";
