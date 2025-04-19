@@ -10,28 +10,7 @@ interface ProductHeaderProps {
 }
 
 const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }: ProductHeaderProps) => {
-  // If plastic or synthetic materials are detected, override the product image to show a plastic product
-  const hasPlastic = detectedMaterials?.some(m => 
-    m.toLowerCase().includes('plastic') || 
-    m.toLowerCase().includes('polymer') || 
-    m.toLowerCase().includes('synthetic')
-  );
-  
-  // Get appropriate product image based on detected materials or product type
-  const getAppropriateImage = () => {
-    if (hasPlastic) {
-      return "/public/lovable-uploads/1a349db0-2346-42a3-838e-5c11d7c9da16.png";
-    }
-    
-    if (detectedMaterials?.some(m => m.toLowerCase().includes('glass'))) {
-      return "/public/lovable-uploads/d6717a4c-0b64-4aea-b65a-a641b57b6eef.png";
-    }
-    
-    // If no specific material is detected, use the product type image
-    return productType ? getProductImage(productType) : null;
-  };
-  
-  const productImage = getAppropriateImage();
+  const productImage = productType ? getProductImage(productType) : null;
   
   // Determine eco score color based on the score
   const getEcoScoreColor = (score: number) => {

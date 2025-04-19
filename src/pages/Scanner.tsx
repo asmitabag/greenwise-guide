@@ -58,23 +58,6 @@ const Scanner = () => {
     // When auto-navigation is disabled, user controls navigation manually
   };
 
-  // When switching tabs, refresh the content to ensure proper data is displayed
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    
-    // If switching to analysis, make sure we have the latest product ID
-    if (value === "analysis" && selectedProduct) {
-      // Re-set the product ID to force the component to refresh
-      const currentProductId = selectedProduct;
-      setSelectedProduct(null);
-      
-      // Small delay to ensure the component unmounts before remounting
-      setTimeout(() => {
-        setSelectedProduct(currentProductId);
-      }, 50);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-eco-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -88,7 +71,7 @@ const Scanner = () => {
           </Link>
         </div>
         
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="scanner">Scanner</TabsTrigger>
             <TabsTrigger value="analysis" disabled={!selectedProduct}>
@@ -103,7 +86,6 @@ const Scanner = () => {
           <TabsContent value="analysis">
             {selectedProduct && (
               <ProductAnalysisView 
-                key={selectedProduct} /* Add key to force re-rendering when product changes */
                 productId={selectedProduct} 
                 onBack={handleBackToScanner} 
               />
