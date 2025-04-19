@@ -9,6 +9,8 @@ import MetricsDisplay from "./analysis/MetricsDisplay";
 import MaterialList from "./analysis/MaterialList";
 import AnalysisWarnings from "./analysis/AnalysisWarnings";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductAnalysisViewProps {
   productId: string;
@@ -16,14 +18,25 @@ interface ProductAnalysisViewProps {
 }
 
 const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) => {
+  const { toast } = useToast();
+  
   const {
     materials,
     certifications,
     materialsLoading,
     materialsError,
     productName,
-    productType
+    productType,
+    refetch
   } = useProductAnalysis(productId);
+
+  // Automatically refetch data when productId changes
+  useEffect(() => {
+    if (productId) {
+      console.log("ProductAnalysisView: Refetching data for product ID:", productId);
+      refetch();
+    }
+  }, [productId, refetch]);
 
   if (materialsLoading) {
     return (
@@ -42,11 +55,21 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
   }
 
   if (materialsError) {
+    console.error("Material analysis error:", materialsError);
     return (
       <Card className="p-4 bg-red-50">
-        <div className="flex items-center gap-2 text-red-600">
-          <AlertCircle size={20} />
-          <p>Error loading material data. Please try again.</p>
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertCircle size={20} />
+            <p>Error loading material data. Please try again.</p>
+          </div>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+          >
+            Retry Analysis
+          </Button>
         </div>
       </Card>
     );
@@ -61,6 +84,13 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
           <p className="text-sm text-gray-500 mt-1">
             This product hasn't been analyzed yet or no material data is available.
           </p>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            className="mt-4"
+          >
+            Retry Analysis
+          </Button>
         </div>
       </Card>
     );

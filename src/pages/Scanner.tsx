@@ -58,6 +58,9 @@ const Scanner = () => {
     // When auto-navigation is disabled, user controls navigation manually
   };
 
+  // Force refresh the key for ProductAnalysisView when tabs change to ensure proper data loading
+  const analysisKey = `analysis-${selectedProduct}-${activeTab === "analysis" ? "active" : "inactive"}`;
+
   return (
     <div className="min-h-screen bg-eco-background p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -86,6 +89,7 @@ const Scanner = () => {
           <TabsContent value="analysis">
             {selectedProduct && (
               <ProductAnalysisView 
+                key={analysisKey}
                 productId={selectedProduct} 
                 onBack={handleBackToScanner} 
               />

@@ -19,8 +19,11 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
     return 'bg-red-500 text-white';
   };
   
+  // Format the score to ensure it's always displayed correctly
+  const formattedScore = isNaN(ecoScore) ? "N/A" : ecoScore.toFixed(1);
+  
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex gap-4 items-center">
         {productImage && (
           <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 shrink-0">
@@ -47,7 +50,7 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
       </div>
       <div>
         <Badge className={getEcoScoreColor(ecoScore)}>
-          Eco Score: {ecoScore.toFixed(1)}/10
+          Eco Score: {formattedScore}/10
         </Badge>
       </div>
     </div>
