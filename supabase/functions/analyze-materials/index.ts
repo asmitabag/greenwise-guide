@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -207,12 +206,203 @@ const productIdToType = {
   "solar-power-bank": "solar-power-bank"
 };
 
+// Function to call Google Cloud Vision API for image analysis
+async function analyzeWithVision(imageBase64: string) {
+  try {
+    const GOOGLE_CLOUD_VISION_API_KEY = Deno.env.get("GOOGLE_CLOUD_VISION_API_KEY");
+    
+    if (!GOOGLE_CLOUD_VISION_API_KEY) {
+      console.error("Google Cloud Vision API key is not set");
+      throw new Error("Missing API key");
+    }
+    
+    const visionApiUrl = `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_CLOUD_VISION_API_KEY}`;
+    
+    const requestBody = {
+      requests: [
+        {
+          image: {
+            content: imageBase64
+          },
+          features: [
+            {
+              type: "LABEL_DETECTION",
+              maxResults: 20
+            },
+            {
+              type: "OBJECT_LOCALIZATION",
+              maxResults: 10
+            },
+            {
+              type: "TEXT_DETECTION",
+              maxResults: 5
+            }
+          ]
+        }
+      ]
+    };
+    
+    const response = await fetch(visionApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Vision API error:", errorText);
+      throw new Error(`Vision API request failed: ${response.status} ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log("Vision API response received");
+    
+    return result.responses[0]; // Return the first response
+  } catch (error) {
+    console.error("Error in Vision API call:", error);
+    throw error;
+  }
+}
+
+// Map detected labels to material types
+function mapLabelsToMaterials(visionResult: any) {
+  const labels = visionResult.labelAnnotations || [];
+  const objects = visionResult.localizedObjectAnnotations || [];
+  const textResults = visionResult.textAnnotations || [];
+  
+  // Extract raw text from the image (ingredients lists, etc)
+  const detectedText = textResults.length > 0 ? textResults[0].description : "";
+  
+  // Combine all detected labels and objects
+  const allDetections = [
+    ...labels.map((l: any) => l.description.toLowerCase()),
+    ...objects.map((o: any) => o.name.toLowerCase())
+  ];
+  
+  // Material categories to check against detected labels
+  const materialCategories = {
+    plastics: ["plastic", "polymer", "polyester", "nylon", "acrylic", "pvc", "vinyl", "synthetic"],
+    metals: ["metal", "aluminum", "aluminium", "steel", "copper", "brass", "bronze", "iron", "tin"],
+    naturalMaterials: ["wood", "cotton", "wool", "silk", "bamboo", "jute", "hemp", "linen", "leather"],
+    glass: ["glass", "crystal"],
+    paper: ["paper", "cardboard", "carton", "pulp"],
+    chemicals: ["chemical", "solvent", "acid", "base", "alcohol", "fragrance"]
+  };
+  
+  // Detected material types
+  const detectedMaterials: string[] = [];
+  
+  // Check text for mentions of ingredients or materials
+  const textLower = detectedText.toLowerCase();
+  
+  if (textLower.includes("ingredients:") || textLower.includes("ingredients list") || 
+      textLower.includes("composition:") || textLower.includes("materials:")) {
+    console.log("Found ingredients list in text");
+    
+    // Common ingredients in cosmetics and household products
+    const commonIngredients = [
+      "water", "aqua", "alcohol", "fragrance", "perfume", "parfum", "glycerin", 
+      "sodium", "acid", "oil", "extract", "butter", "seed oil", "fruit extract"
+    ];
+    
+    // Check for each ingredient in the text
+    commonIngredients.forEach(ingredient => {
+      if (textLower.includes(ingredient)) {
+        detectedMaterials.push(ingredient);
+      }
+    });
+  }
+  
+  // Check all detected labels against our material categories
+  for (const [category, keywords] of Object.entries(materialCategories)) {
+    for (const keyword of keywords) {
+      if (allDetections.some(label => label.includes(keyword))) {
+        // Add the specific keyword that was found
+        const matchedLabels = allDetections.filter(label => label.includes(keyword));
+        detectedMaterials.push(...matchedLabels);
+        
+        // Also add the category name if we haven't already
+        if (!detectedMaterials.includes(category)) {
+          detectedMaterials.push(category);
+        }
+      }
+    }
+  }
+  
+  // Specific product type detection
+  const isBottle = allDetections.some(label => 
+    label.includes("bottle") || label.includes("container") || label.includes("packaging"));
+  const isCosmetic = allDetections.some(label => 
+    label.includes("cosmetic") || label.includes("beauty") || label.includes("makeup") || 
+    label.includes("perfume") || label.includes("fragrance"));
+  const isClothing = allDetections.some(label => 
+    label.includes("clothing") || label.includes("textile") || label.includes("fabric") || 
+    label.includes("shirt") || label.includes("dress"));
+  
+  if (isBottle && detectedMaterials.some(m => m.includes("plastic"))) {
+    detectedMaterials.push("plastic bottle");
+  } else if (isBottle && detectedMaterials.some(m => m.includes("glass"))) {
+    detectedMaterials.push("glass bottle");
+  }
+  
+  if (isCosmetic) {
+    detectedMaterials.push("cosmetic product");
+    
+    // For perfumes specifically
+    if (allDetections.some(label => label.includes("perfume") || label.includes("fragrance"))) {
+      detectedMaterials.push("perfume");
+      detectedMaterials.push("fragrance compounds");
+      if (!detectedMaterials.includes("alcohol")) {
+        detectedMaterials.push("alcohol");  // Common in perfumes
+      }
+    }
+  }
+  
+  if (isClothing) {
+    detectedMaterials.push("textile");
+  }
+  
+  // Clean up and remove duplicates
+  const uniqueMaterials = [...new Set(detectedMaterials)];
+  
+  // Map these materials to eco-friendliness score (0-10 scale)
+  let ecoScore = 5; // Default middle score
+  
+  // Sustainable materials increase score
+  const sustainableMaterials = ["bamboo", "cotton", "wool", "natural", "organic", "recycled", "biodegradable"];
+  // Unsustainable materials decrease score
+  const unsustainableMaterials = ["plastic", "synthetic", "pvc", "chemical", "acrylic"];
+  
+  // Count sustainable vs unsustainable materials
+  const sustainableCount = uniqueMaterials.filter(m => 
+    sustainableMaterials.some(sm => m.includes(sm))).length;
+  
+  const unsustainableCount = uniqueMaterials.filter(m => 
+    unsustainableMaterials.some(um => m.includes(um))).length;
+  
+  // Calculate score (2-9 range)
+  const totalRelevantMaterials = Math.max(1, sustainableCount + unsustainableCount);
+  ecoScore = 2 + (7 * (sustainableCount / totalRelevantMaterials));
+  ecoScore = Math.min(9.5, Math.max(2.0, ecoScore)); // Clamp between 2.0-9.5
+  
+  return {
+    materials: uniqueMaterials,
+    eco_score: ecoScore,
+    labels: labels,
+    objects: objects,
+    textResults: textResults.length > 0 ? textResults[0].description : null
+  };
+}
+
 // Enhanced material analysis based on actual image content
-function analyzeMaterials(imageData: string, fileName?: string, productId?: string, productType?: string) {
+function analyzeMaterials(imageData: string, fileName?: string, productId?: string, productType?: string, useVision?: boolean) {
   console.log("Analyzing materials from image data of length:", imageData.length);
   console.log("File name if available:", fileName);
   console.log("Product ID:", productId);
   console.log("Product type:", productType);
+  console.log("Using Vision API:", useVision);
   
   // If product type is directly specified, use it
   if (productType && predefinedMaterials[productType as keyof typeof predefinedMaterials]) {
@@ -321,7 +511,7 @@ serve(async (req) => {
       );
     }
     
-    const { image, productId, fileName, productType } = requestBody;
+    const { image, productId, fileName, productType, useVision } = requestBody;
 
     if (!productId) {
       console.error("Missing required parameter: productId");
@@ -360,7 +550,51 @@ serve(async (req) => {
       );
     }
 
-    // Analyze materials in the image
+    // Use Google Vision API if requested
+    if (useVision) {
+      try {
+        console.log("Using Google Cloud Vision API for analysis");
+        const visionResult = await analyzeWithVision(image);
+        console.log("Vision API analysis complete");
+        
+        // Map the vision results to our materials format
+        const materialResults = mapLabelsToMaterials(visionResult);
+        
+        // Combine with our predefined materials for the known product type if available
+        let baseResult = {};
+        if (productType && predefinedMaterials[productType as keyof typeof predefinedMaterials]) {
+          baseResult = predefinedMaterials[productType as keyof typeof predefinedMaterials];
+        } else if (productId && productIdToType[productId as keyof typeof productIdToType]) {
+          const type = productIdToType[productId as keyof typeof productIdToType];
+          baseResult = predefinedMaterials[type as keyof typeof predefinedMaterials];
+        }
+        
+        // Return combined results with the raw vision data for debugging
+        return new Response(
+          JSON.stringify({ 
+            ...baseResult,
+            materials: materialResults.materials,
+            eco_score: materialResults.eco_score,
+            visionData: {
+              labelAnnotations: materialResults.labels,
+              objectAnnotations: materialResults.objects,
+              textAnnotation: materialResults.textResults
+            },
+            success: true 
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200 
+          },
+        );
+      } catch (visionError) {
+        console.error("Error using Vision API:", visionError);
+        // Fall back to standard analysis if Vision API fails
+        console.log("Falling back to standard analysis");
+      }
+    }
+
+    // Standard analysis without Vision API
     console.log(`Processing image for product ID: ${productId}, type: ${productType}`);
     const result = analyzeMaterials(image, fileName, productId, productType);
     console.log("Analysis complete with result:", result ? "success" : "failure");

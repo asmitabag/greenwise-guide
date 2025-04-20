@@ -22,6 +22,41 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
   // Format the score to ensure it's always displayed correctly
   const formattedScore = isNaN(ecoScore) ? "N/A" : ecoScore.toFixed(1);
   
+  // Format material names to be more readable
+  const formatMaterialName = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  
+  // Filter out duplicate and similar materials for cleaner display
+  const getFilteredMaterials = () => {
+    if (!detectedMaterials || detectedMaterials.length === 0) return [];
+    
+    const uniqueMaterials = new Set<string>();
+    const filteredList: string[] = [];
+    
+    detectedMaterials.forEach(material => {
+      // Normalize the material name to avoid similar duplicates
+      const normalizedName = material.toLowerCase().trim();
+      
+      // Check if we've already added a similar material
+      const isSimilarToExisting = Array.from(uniqueMaterials).some(existing => 
+        normalizedName.includes(existing) || existing.includes(normalizedName)
+      );
+      
+      if (!isSimilarToExisting) {
+        uniqueMaterials.add(normalizedName);
+        filteredList.push(formatMaterialName(material));
+      }
+    });
+    
+    return filteredList;
+  };
+  
+  const filteredMaterials = getFilteredMaterials();
+  
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex gap-4 items-center">
@@ -34,11 +69,11 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
           <p className="text-lg font-medium">{productName}</p>
           <p className="text-sm text-gray-600 mt-1">Sustainability Analysis</p>
           
-          {detectedMaterials && detectedMaterials.length > 0 && (
+          {filteredMaterials.length > 0 && (
             <div className="mt-2">
               <p className="text-xs font-medium text-gray-500">Detected Materials:</p>
               <div className="flex flex-wrap gap-1 mt-1">
-                {detectedMaterials.map((material, index) => (
+                {filteredMaterials.map((material, index) => (
                   <Badge key={index} variant="outline" className="text-xs">
                     {material}
                   </Badge>
