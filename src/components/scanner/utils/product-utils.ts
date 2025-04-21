@@ -1,4 +1,3 @@
-
 // Product mappings and utility functions for analysis
 export const productMaterialMappings = {
   // Bamboo Water Bottle - ID: 1
@@ -89,13 +88,13 @@ export const productMaterialMappings = {
   "3": [ 
     { 
       id: "3-1",
-      name: "Aloe Vera Extract", 
-      percentage: 40, 
+      name: "Aloe Vera Gel", 
+      percentage: 50, 
       eco_score: 9.0, 
       sustainable: true, 
-      details: "Natural moisturizing ingredient",
+      details: "Natural moisturizing plant extract",
       carbon_footprint: 0.3,
-      water_usage: 40,
+      water_usage: 30,
       recyclability_rating: 8,
       biodegradability_rating: 10,
       certification_ids: ["cert-1", "cert-4"]
@@ -115,26 +114,13 @@ export const productMaterialMappings = {
     },
     { 
       id: "3-3",
-      name: "Coconut Oil", 
+      name: "Organic Oils & Extracts", 
       percentage: 20, 
-      eco_score: 7.0, 
+      eco_score: 8.0, 
       sustainable: true, 
-      details: "Natural oil with multiple skin benefits",
-      carbon_footprint: 0.9,
-      water_usage: 30,
-      recyclability_rating: 8,
-      biodegradability_rating: 9,
-      certification_ids: ["cert-1", "cert-4"]
-    },
-    { 
-      id: "3-4",
-      name: "Natural Preservatives", 
-      percentage: 10, 
-      eco_score: 6.5, 
-      sustainable: true, 
-      details: "Plant-derived preservation system",
+      details: "Plant-based oils with minimal environmental impact",
       carbon_footprint: 1.1,
-      water_usage: 10,
+      water_usage: 15,
       recyclability_rating: 7,
       biodegradability_rating: 8,
       certification_ids: ["cert-3"]
@@ -145,7 +131,7 @@ export const productMaterialMappings = {
     { 
       id: "4-1",
       name: "Recycled Paper", 
-      percentage: 85, 
+      percentage: 80, 
       eco_score: 7.0, 
       sustainable: true, 
       details: "Made from post-consumer waste paper",
@@ -158,7 +144,7 @@ export const productMaterialMappings = {
     { 
       id: "4-2",
       name: "Plant-based Lining", 
-      percentage: 10, 
+      percentage: 15, 
       eco_score: 8.0, 
       sustainable: true, 
       details: "Biodegradable alternative to plastic lining",
@@ -199,7 +185,7 @@ export const productMaterialMappings = {
     },
     { 
       id: "5-2",
-      name: "Silicon Solar Panel", 
+      name: "Silicon Solar Panels", 
       percentage: 20, 
       eco_score: 6.0, 
       sustainable: true, 
@@ -225,307 +211,6 @@ export const productMaterialMappings = {
     },
     { 
       id: "5-4",
-      name: "Recycled Plastic", 
-      percentage: 5, 
-      eco_score: 5.0, 
-      sustainable: true, 
-      details: "Used for smaller components",
-      carbon_footprint: 9.8,
-      water_usage: 150,
-      recyclability_rating: 3,
-      biodegradability_rating: 0,
-      certification_ids: []
-    }
-  ],
-  // Perfume with detailed fragrance-specific materials
-  "perfume": [ 
-    { 
-      id: "perfume-1",
-      name: "Alcohol (Denatured)", 
-      percentage: 79.2, 
-      eco_score: 5.0, 
-      sustainable: false, 
-      details: "Main carrier for fragrance compounds",
-      carbon_footprint: 2.3,
-      water_usage: 85,
-      recyclability_rating: 7,
-      biodegradability_rating: 8,
-      certification_ids: []
-    },
-    { 
-      id: "perfume-2",
-      name: "Perfume Compounds", 
-      percentage: 15, 
-      eco_score: 4.0, 
-      sustainable: false, 
-      details: "Synthetic fragrance ingredients",
-      carbon_footprint: 3.8,
-      water_usage: 120,
-      recyclability_rating: 3,
-      biodegradability_rating: 4,
-      certification_ids: []
-    },
-    { 
-      id: "perfume-3",
-      name: "Di-ethyl Phthalate", 
-      percentage: 2.5, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Chemical fixative with environmental concerns",
-      carbon_footprint: 5.1,
-      water_usage: 95,
-      recyclability_rating: 2,
-      biodegradability_rating: 2,
-      certification_ids: []
-    },
-    { 
-      id: "perfume-4",
-      name: "Tertiary Butyl Alcohol", 
-      percentage: 0.5, 
-      eco_score: 3.0, 
-      sustainable: false, 
-      details: "Denaturant to make alcohol undrinkable",
-      carbon_footprint: 3.9,
-      water_usage: 110,
-      recyclability_rating: 4,
-      biodegradability_rating: 5,
-      certification_ids: []
-    },
-    { 
-      id: "perfume-5",
-      name: "Linalool", 
-      percentage: 1.2, 
-      eco_score: 6.0, 
-      sustainable: true, 
-      details: "Natural terpene alcohol from plants",
-      carbon_footprint: 1.8,
-      water_usage: 65,
-      recyclability_rating: 6,
-      biodegradability_rating: 7,
-      certification_ids: ["cert-4"]
-    },
-    { 
-      id: "perfume-6",
-      name: "Alpha-Isomethyl Ionone", 
-      percentage: 0.8, 
-      eco_score: 4.0, 
-      sustainable: false, 
-      details: "Synthetic floral fragrance ingredient",
-      carbon_footprint: 4.2,
-      water_usage: 80,
-      recyclability_rating: 3,
-      biodegradability_rating: 4,
-      certification_ids: []
-    },
-    { 
-      id: "perfume-7",
-      name: "Citral", 
-      percentage: 0.5, 
-      eco_score: 7.0, 
-      sustainable: true, 
-      details: "Natural compound from citrus oils",
-      carbon_footprint: 1.5,
-      water_usage: 40,
-      recyclability_rating: 6,
-      biodegradability_rating: 7,
-      certification_ids: ["cert-4"]
-    },
-    { 
-      id: "perfume-8",
-      name: "Hydroxycitronellal", 
-      percentage: 0.3, 
-      eco_score: 4.0, 
-      sustainable: false, 
-      details: "Synthetic floral fragrance ingredient",
-      carbon_footprint: 3.7,
-      water_usage: 75,
-      recyclability_rating: 3,
-      biodegradability_rating: 4,
-      certification_ids: []
-    }
-  ],
-  // FastGlam Party Dress with detailed fashion materials
-  "fast-fashion-dress-001": [ 
-    { 
-      id: "fd-1",
-      name: "Polyester", 
-      percentage: 75, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Synthetic petroleum-based fabric with high environmental impact",
-      carbon_footprint: 6.8,
-      water_usage: 90,
-      recyclability_rating: 4,
-      biodegradability_rating: 1,
-      certification_ids: []
-    },
-    { 
-      id: "fd-2",
-      name: "Plastic Sequins", 
-      percentage: 15, 
-      eco_score: 1.0, 
-      sustainable: false, 
-      details: "Non-biodegradable microplastics that contribute to pollution",
-      carbon_footprint: 8.2,
-      water_usage: 110,
-      recyclability_rating: 1,
-      biodegradability_rating: 0,
-      certification_ids: []
-    },
-    { 
-      id: "fd-3",
-      name: "Synthetic Fiber", 
-      percentage: 10, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Petroleum-based fibers that shed microplastics during washing",
-      carbon_footprint: 5.9,
-      water_usage: 85,
-      recyclability_rating: 3,
-      biodegradability_rating: 1,
-      certification_ids: []
-    }
-  ],
-  // SnapQuick Disposable Camera Kit with detailed camera materials
-  "disposable-camera-001": [ 
-    { 
-      id: "dc-1",
-      name: "Plastic Housing", 
-      percentage: 60, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Single-use plastic body designed for disposal after use",
-      carbon_footprint: 7.3,
-      water_usage: 95,
-      recyclability_rating: 2,
-      biodegradability_rating: 1,
-      certification_ids: []
-    },
-    { 
-      id: "dc-2",
-      name: "Electronic Components", 
-      percentage: 20, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Circuit boards and flash mechanism containing heavy metals",
-      carbon_footprint: 9.7,
-      water_usage: 130,
-      recyclability_rating: 2,
-      biodegradability_rating: 0,
-      certification_ids: []
-    },
-    { 
-      id: "dc-3",
-      name: "Batteries", 
-      percentage: 10, 
-      eco_score: 1.0, 
-      sustainable: false, 
-      details: "Contains toxic chemicals and heavy metals requiring special disposal",
-      carbon_footprint: 12.4,
-      water_usage: 180,
-      recyclability_rating: 3,
-      biodegradability_rating: 0,
-      certification_ids: []
-    },
-    { 
-      id: "dc-4",
-      name: "Photographic Chemicals", 
-      percentage: 10, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Film processing chemicals harmful to aquatic environments",
-      carbon_footprint: 5.8,
-      water_usage: 160,
-      recyclability_rating: 1,
-      biodegradability_rating: 2,
-      certification_ids: []
-    }
-  ],
-  // TrendEye Colorful Sunglasses with detailed eyewear materials
-  "plastic-glasses-001": [ 
-    { 
-      id: "pg-1",
-      name: "Acrylic Plastic", 
-      percentage: 85, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Petroleum-based plastic with high environmental footprint",
-      carbon_footprint: 5.8,
-      water_usage: 75,
-      recyclability_rating: 3,
-      biodegradability_rating: 1,
-      certification_ids: []
-    },
-    { 
-      id: "pg-2",
-      name: "Metal Hinges", 
-      percentage: 5, 
-      eco_score: 4.0, 
-      sustainable: false, 
-      details: "Small metal components with medium recyclability",
-      carbon_footprint: 3.2,
-      water_usage: 60,
-      recyclability_rating: 7,
-      biodegradability_rating: 0,
-      certification_ids: []
-    },
-    { 
-      id: "pg-3",
-      name: "Synthetic Dyes", 
-      percentage: 10, 
-      eco_score: 2.0, 
-      sustainable: false, 
-      details: "Chemical colorants with potential water pollution impact",
-      carbon_footprint: 4.1,
-      water_usage: 90,
-      recyclability_rating: 1,
-      biodegradability_rating: 2,
-      certification_ids: []
-    }
-  ],
-  // EcoCharge Solar Power Bank with detailed electronics materials
-  "solar-power-bank-001": [ 
-    { 
-      id: "spb-1",
-      name: "Recycled Aluminum", 
-      percentage: 40, 
-      eco_score: 7.0, 
-      sustainable: true, 
-      details: "Durable casing made from post-consumer aluminum",
-      carbon_footprint: 3.5,
-      water_usage: 70,
-      recyclability_rating: 9,
-      biodegradability_rating: 1,
-      certification_ids: ["cert-2"]
-    },
-    { 
-      id: "spb-2",
-      name: "Silicon Solar Panels", 
-      percentage: 20, 
-      eco_score: 6.0, 
-      sustainable: true, 
-      details: "Renewable energy technology with medium production impact",
-      carbon_footprint: 8.2,
-      water_usage: 120,
-      recyclability_rating: 5,
-      biodegradability_rating: 1,
-      certification_ids: []
-    },
-    { 
-      id: "spb-3",
-      name: "Lithium-ion Battery", 
-      percentage: 35, 
-      eco_score: 4.0, 
-      sustainable: false, 
-      details: "Energy storage with significant mining impact",
-      carbon_footprint: 12.5,
-      water_usage: 200,
-      recyclability_rating: 4,
-      biodegradability_rating: 0,
-      certification_ids: []
-    },
-    { 
-      id: "spb-4",
       name: "Recycled Plastic", 
       percentage: 5, 
       eco_score: 5.0, 
@@ -685,7 +370,7 @@ export const determineProductKey = (id: string): string => {
   }
   
   // Check for toothbrush
-  if (id.includes("toothbrush") || id.includes("bamboo-tooth")) {
+  if (id.includes("toothbrush") || (id.includes("bamboo") && !id.includes("toothbrush"))) {
     return "biodegradable-bamboo-toothbrush";
   }
   
