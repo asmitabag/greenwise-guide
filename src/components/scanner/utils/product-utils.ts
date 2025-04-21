@@ -260,6 +260,196 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
+  "fast-fashion-dress-001": [ // FastGlam Party Dress
+    { 
+      id: "fd-1",
+      name: "Polyester", 
+      percentage: 75, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Synthetic petroleum-based fabric with high environmental impact",
+      carbon_footprint: 6.8,
+      water_usage: 90,
+      recyclability_rating: 4,
+      biodegradability_rating: 1,
+      certification_ids: []
+    },
+    { 
+      id: "fd-2",
+      name: "Plastic Sequins", 
+      percentage: 15, 
+      eco_score: 1.0, 
+      sustainable: false, 
+      details: "Non-biodegradable microplastics that contribute to pollution",
+      carbon_footprint: 8.2,
+      water_usage: 110,
+      recyclability_rating: 1,
+      biodegradability_rating: 0,
+      certification_ids: []
+    },
+    { 
+      id: "fd-3",
+      name: "Synthetic Fiber", 
+      percentage: 10, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Petroleum-based fibers that shed microplastics during washing",
+      carbon_footprint: 5.9,
+      water_usage: 85,
+      recyclability_rating: 3,
+      biodegradability_rating: 1,
+      certification_ids: []
+    }
+  ],
+  "disposable-camera-001": [ // SnapQuick Disposable Camera
+    { 
+      id: "dc-1",
+      name: "Plastic Housing", 
+      percentage: 60, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Single-use plastic body designed for disposal after use",
+      carbon_footprint: 7.3,
+      water_usage: 95,
+      recyclability_rating: 2,
+      biodegradability_rating: 1,
+      certification_ids: []
+    },
+    { 
+      id: "dc-2",
+      name: "Electronic Components", 
+      percentage: 20, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Circuit boards and flash mechanism containing heavy metals",
+      carbon_footprint: 9.7,
+      water_usage: 130,
+      recyclability_rating: 2,
+      biodegradability_rating: 0,
+      certification_ids: []
+    },
+    { 
+      id: "dc-3",
+      name: "Batteries", 
+      percentage: 10, 
+      eco_score: 1.0, 
+      sustainable: false, 
+      details: "Contains toxic chemicals and heavy metals requiring special disposal",
+      carbon_footprint: 12.4,
+      water_usage: 180,
+      recyclability_rating: 3,
+      biodegradability_rating: 0,
+      certification_ids: []
+    },
+    { 
+      id: "dc-4",
+      name: "Photographic Chemicals", 
+      percentage: 10, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Film processing chemicals harmful to aquatic environments",
+      carbon_footprint: 5.8,
+      water_usage: 160,
+      recyclability_rating: 1,
+      biodegradability_rating: 2,
+      certification_ids: []
+    }
+  ],
+  "plastic-glasses-001": [ // TrendEye Colorful Sunglasses
+    { 
+      id: "pg-1",
+      name: "Acrylic Plastic", 
+      percentage: 85, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Petroleum-based plastic with high environmental footprint",
+      carbon_footprint: 5.8,
+      water_usage: 75,
+      recyclability_rating: 3,
+      biodegradability_rating: 1,
+      certification_ids: []
+    },
+    { 
+      id: "pg-2",
+      name: "Metal Hinges", 
+      percentage: 5, 
+      eco_score: 4.0, 
+      sustainable: false, 
+      details: "Small metal components with medium recyclability",
+      carbon_footprint: 3.2,
+      water_usage: 60,
+      recyclability_rating: 7,
+      biodegradability_rating: 0,
+      certification_ids: []
+    },
+    { 
+      id: "pg-3",
+      name: "Synthetic Dyes", 
+      percentage: 10, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Chemical colorants with potential water pollution impact",
+      carbon_footprint: 4.1,
+      water_usage: 90,
+      recyclability_rating: 1,
+      biodegradability_rating: 2,
+      certification_ids: []
+    }
+  ],
+  "solar-power-bank-001": [ // EcoCharge Solar Power Bank
+    { 
+      id: "spb-1",
+      name: "Recycled Aluminum", 
+      percentage: 40, 
+      eco_score: 7.0, 
+      sustainable: true, 
+      details: "Durable casing made from post-consumer aluminum",
+      carbon_footprint: 3.5,
+      water_usage: 70,
+      recyclability_rating: 9,
+      biodegradability_rating: 1,
+      certification_ids: ["cert-2"]
+    },
+    { 
+      id: "spb-2",
+      name: "Silicon Solar Panels", 
+      percentage: 20, 
+      eco_score: 6.0, 
+      sustainable: true, 
+      details: "Renewable energy technology with medium production impact",
+      carbon_footprint: 8.2,
+      water_usage: 120,
+      recyclability_rating: 5,
+      biodegradability_rating: 1,
+      certification_ids: []
+    },
+    { 
+      id: "spb-3",
+      name: "Lithium-ion Battery", 
+      percentage: 35, 
+      eco_score: 4.0, 
+      sustainable: false, 
+      details: "Energy storage with significant mining impact",
+      carbon_footprint: 12.5,
+      water_usage: 200,
+      recyclability_rating: 4,
+      biodegradability_rating: 0,
+      certification_ids: []
+    },
+    { 
+      id: "spb-4",
+      name: "Recycled Plastic", 
+      percentage: 5, 
+      eco_score: 5.0, 
+      sustainable: true, 
+      details: "Used for smaller components",
+      carbon_footprint: 9.8,
+      water_usage: 150,
+      recyclability_rating: 3,
+      biodegradability_rating: 0,
+      certification_ids: []
+    }
+  ],
   "plastic": [ // Generic plastic product
     { 
       id: "plastic-1",
@@ -289,13 +479,32 @@ export const productDescriptions = {
   "organic-cotton-shirt": "Organic Cotton T-shirt",
   "natural-face-cream": "Natural Face Cream",
   "recycled-coffee-cup": "Recycled Coffee Cup",
-  "solar-power-bank": "Solar Power Bank"
+  "solar-power-bank": "Solar Power Bank",
+  "fast-fashion-dress-001": "FastGlam Party Dress",
+  "disposable-camera-001": "SnapQuick Disposable Camera Kit",
+  "plastic-glasses-001": "TrendEye Colorful Sunglasses Set",
+  "solar-power-bank-001": "EcoCharge Solar Power Bank"
 };
 
 export const determineProductKey = (id: string): string => {
   // Direct matches
-  if (["1", "2", "3", "4", "5", "perfume"].includes(id)) {
+  if (["1", "2", "3", "4", "5", "perfume", "fast-fashion-dress-001", "disposable-camera-001", "plastic-glasses-001", "solar-power-bank-001"].includes(id)) {
     return id;
+  }
+  
+  // Check for FastGlam party dress
+  if (id.includes("dress") || id.includes("fashion") || id.includes("glam") || id.includes("party")) {
+    return "fast-fashion-dress-001";
+  }
+  
+  // Check for disposable camera
+  if (id.includes("camera") || id.includes("snap") || id.includes("disposable")) {
+    return "disposable-camera-001";
+  }
+  
+  // Check for sunglasses
+  if (id.includes("glass") || id.includes("sunglass") || id.includes("trend") || id.includes("eye")) {
+    return "plastic-glasses-001";
   }
   
   // Check for product type in the ID
@@ -312,7 +521,7 @@ export const determineProductKey = (id: string): string => {
     return "4";
   }
   if (id.includes("power") || id.includes("solar") || id.includes("bank")) {
-    return "5";
+    return "solar-power-bank-001";
   }
   if (id.includes("perfume") || id.includes("fragrance") || id.includes("cologne")) {
     return "perfume";
@@ -334,7 +543,7 @@ export const determineProductName = (
   hasDetectedPlastic: boolean,
   productId: string
 ): string => {
-  if (hasDetectedPlastic) {
+  if (hasDetectedPlastic && !productId.includes("solar") && !productId.includes("power")) {
     return "Plastic Product";
   }
   
@@ -343,12 +552,23 @@ export const determineProductName = (
     return productDescriptions[productType];
   }
   
+  // Check for specific products first
+  if (productId.includes("dress") || productId.includes("fashion") || productId.includes("glam") || productId.includes("party")) {
+    return "FastGlam Party Dress";
+  }
+  if (productId.includes("camera") || productId.includes("snap") || productId.includes("disposable")) {
+    return "SnapQuick Disposable Camera Kit";
+  }
+  if (productId.includes("glass") || productId.includes("sunglass") || productId.includes("trend") || productId.includes("eye")) {
+    return "TrendEye Colorful Sunglasses Set";
+  }
+  
   // Check for product type in the ID
   if (productId.includes("bottle") || productId.includes("bamboo")) return "Bamboo Water Bottle";
   if (productId.includes("shirt") || productId.includes("cotton")) return "Organic Cotton T-shirt";
   if (productId.includes("cream") || productId.includes("face")) return "Natural Face Cream";
   if (productId.includes("coffee") || productId.includes("cup")) return "Recycled Coffee Cup";
-  if (productId.includes("power") || productId.includes("solar")) return "Solar Power Bank";
+  if (productId.includes("power") || productId.includes("solar")) return "EcoCharge Solar Power Bank";
   if (productId.includes("perfume") || productId.includes("fragrance")) return "Fragrance";
   if (productId.includes("plastic")) return "Plastic Product";
   
@@ -373,9 +593,16 @@ export const getProductImage = (productType: string): string => {
       return "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
     case "5":
     case "solar-power-bank":
+    case "solar-power-bank-001":
       return "https://images.unsplash.com/photo-1594131975464-8a26d4ad3f7f?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     case "perfume":
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+    case "fast-fashion-dress-001":
+      return "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80";
+    case "disposable-camera-001":
+      return "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80";
+    case "plastic-glasses-001":
+      return "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80";
     default:
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
   }

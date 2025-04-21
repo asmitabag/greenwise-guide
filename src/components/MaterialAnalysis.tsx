@@ -30,7 +30,7 @@ interface Certification {
   description: string;
 }
 
-// Fixed predefined materials data for the first 5 products with accurate descriptions
+// Expanded predefined materials data for all products in the store with accurate descriptions
 const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
   // Bamboo Water Bottle - ID: 1
   "1": [
@@ -251,6 +251,135 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       product_id: "5"
     }
   ],
+  // FastGlam Party Dress - (added for the specific products mentioned)
+  "fast-fashion-dress-001": [
+    {
+      id: "fd-1",
+      material_name: "Polyester",
+      eco_score: 2,
+      impact_description: "Synthetic petroleum-based fabric with high environmental impact",
+      carbon_footprint: 6.8,
+      water_usage: 90,
+      recyclability_rating: 4,
+      biodegradability_rating: 1,
+      certification_ids: [],
+      product_id: "fast-fashion-dress-001"
+    },
+    {
+      id: "fd-2",
+      material_name: "Plastic Sequins",
+      eco_score: 1,
+      impact_description: "Non-biodegradable microplastics that contribute to pollution",
+      carbon_footprint: 8.2,
+      water_usage: 110,
+      recyclability_rating: 1,
+      biodegradability_rating: 0,
+      certification_ids: [],
+      product_id: "fast-fashion-dress-001"
+    },
+    {
+      id: "fd-3",
+      material_name: "Synthetic Fiber",
+      eco_score: 2,
+      impact_description: "Petroleum-based fibers that shed microplastics during washing",
+      carbon_footprint: 5.9,
+      water_usage: 85,
+      recyclability_rating: 3,
+      biodegradability_rating: 1,
+      certification_ids: [],
+      product_id: "fast-fashion-dress-001"
+    }
+  ],
+  // SnapQuick Disposable Camera Kit
+  "disposable-camera-001": [
+    {
+      id: "dc-1",
+      material_name: "Plastic Housing",
+      eco_score: 2,
+      impact_description: "Single-use plastic body designed for disposal after use",
+      carbon_footprint: 7.3,
+      water_usage: 95,
+      recyclability_rating: 2,
+      biodegradability_rating: 1,
+      certification_ids: [],
+      product_id: "disposable-camera-001"
+    },
+    {
+      id: "dc-2",
+      material_name: "Electronic Components",
+      eco_score: 2,
+      impact_description: "Circuit boards and flash mechanism containing heavy metals",
+      carbon_footprint: 9.7,
+      water_usage: 130,
+      recyclability_rating: 2,
+      biodegradability_rating: 0,
+      certification_ids: [],
+      product_id: "disposable-camera-001"
+    },
+    {
+      id: "dc-3",
+      material_name: "Batteries",
+      eco_score: 1,
+      impact_description: "Contains toxic chemicals and heavy metals requiring special disposal",
+      carbon_footprint: 12.4,
+      water_usage: 180,
+      recyclability_rating: 3,
+      biodegradability_rating: 0,
+      certification_ids: [],
+      product_id: "disposable-camera-001"
+    },
+    {
+      id: "dc-4",
+      material_name: "Photographic Chemicals",
+      eco_score: 2,
+      impact_description: "Film processing chemicals harmful to aquatic environments",
+      carbon_footprint: 5.8,
+      water_usage: 160,
+      recyclability_rating: 1,
+      biodegradability_rating: 2,
+      certification_ids: [],
+      product_id: "disposable-camera-001"
+    }
+  ],
+  // TrendEye Colorful Sunglasses Set
+  "plastic-glasses-001": [
+    {
+      id: "pg-1",
+      material_name: "Acrylic Plastic",
+      eco_score: 2,
+      impact_description: "Petroleum-based plastic with high environmental footprint",
+      carbon_footprint: 5.8,
+      water_usage: 75,
+      recyclability_rating: 3,
+      biodegradability_rating: 1,
+      certification_ids: [],
+      product_id: "plastic-glasses-001"
+    },
+    {
+      id: "pg-2",
+      material_name: "Metal Hinges",
+      eco_score: 4,
+      impact_description: "Small metal components with medium recyclability",
+      carbon_footprint: 3.2,
+      water_usage: 60,
+      recyclability_rating: 7,
+      biodegradability_rating: 0,
+      certification_ids: [],
+      product_id: "plastic-glasses-001"
+    },
+    {
+      id: "pg-3",
+      material_name: "Synthetic Dyes",
+      eco_score: 2,
+      impact_description: "Chemical colorants with potential water pollution impact",
+      carbon_footprint: 4.1,
+      water_usage: 90,
+      recyclability_rating: 1,
+      biodegradability_rating: 2,
+      certification_ids: [],
+      product_id: "plastic-glasses-001"
+    }
+  ],
   // Perfume
   "perfume": [
     {
@@ -302,21 +431,44 @@ const predefinedMaterials: Record<string, MaterialAnalysis[]> = {
       product_id: "perfume"
     }
   ],
-  // Adding specific mappings for product keywords to ensure correct materials are shown
-  "bamboo-water-bottle": [
-    // Same as "1" materials
-  ],
-  "organic-cotton-shirt": [
-    // Same as "2" materials
-  ],
-  "natural-face-cream": [
-    // Same as "3" materials
-  ],
-  "recycled-coffee-cup": [
-    // Same as "4" materials
-  ],
-  "solar-power-bank": [
-    // Same as "5" materials
+  // Solar Power Bank (using direct ID from product list)
+  "solar-power-bank-001": [
+    {
+      id: "spb-1",
+      material_name: "Recycled Aluminum",
+      eco_score: 7,
+      impact_description: "Durable casing made from post-consumer aluminum",
+      carbon_footprint: 3.5,
+      water_usage: 70,
+      recyclability_rating: 9,
+      biodegradability_rating: 1,
+      certification_ids: ["cert-2"],
+      product_id: "solar-power-bank-001"
+    },
+    {
+      id: "spb-2",
+      material_name: "Silicon Solar Panels",
+      eco_score: 6,
+      impact_description: "Renewable energy technology with medium production impact",
+      carbon_footprint: 8.2,
+      water_usage: 120,
+      recyclability_rating: 5,
+      biodegradability_rating: 1,
+      certification_ids: [],
+      product_id: "solar-power-bank-001"
+    },
+    {
+      id: "spb-3",
+      material_name: "Lithium-ion Battery",
+      eco_score: 3,
+      impact_description: "Energy storage with significant mining impact",
+      carbon_footprint: 12.5,
+      water_usage: 200,
+      recyclability_rating: 4,
+      biodegradability_rating: 0,
+      certification_ids: [],
+      product_id: "solar-power-bank-001"
+    }
   ]
 };
 
@@ -367,20 +519,33 @@ const productDescriptions = {
   "organic-cotton-shirt": "Organic Cotton T-shirt with natural dyes and minimal elastane",
   "natural-face-cream": "Natural Face Cream with aloe vera, shea butter, coconut oil and beeswax",
   "recycled-coffee-cup": "Recycled Coffee Cup with plant-based lining and vegetable inks",
-  "solar-power-bank": "Solar Power Bank with recycled aluminum casing, solar panels and battery"
+  "solar-power-bank": "Solar Power Bank with recycled aluminum casing, solar panels and battery",
+  "fast-fashion-dress-001": "FastGlam Party Dress with polyester, plastic sequins, and synthetic fibers",
+  "disposable-camera-001": "Disposable Camera Kit with plastic casing and electronic components",
+  "plastic-glasses-001": "Colorful Sunglasses Set made with acrylic plastic and metal hinges",
+  "solar-power-bank-001": "EcoCharge Solar Power Bank with recycled aluminum and solar panels"
 };
 
 const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
   const normalizedProductId = productId.startsWith('fc') ? productId : productId.trim();
   
-  // Detailed mapping logic to ensure correct materials are shown for each product
+  // Enhanced mapping logic to better match product IDs to their material data
   const determineProductType = (id: string): string => {
-    // Direct matches
-    if (["1", "2", "3", "4", "5", "perfume"].includes(id)) {
+    // Direct matches for specific product IDs
+    if (predefinedMaterials[id]) {
       return id;
     }
     
-    // Check for string matches in ID
+    // Check for specific product types by partial ID match
+    if (id.includes("fast") || id.includes("dress") || id.includes("fashion")) {
+      return "fast-fashion-dress-001";
+    }
+    if (id.includes("camera") || id.includes("disposable") || id.includes("snap")) {
+      return "disposable-camera-001";
+    }
+    if (id.includes("glass") || id.includes("sunglass") || id.includes("trend") || id.includes("eye")) {
+      return "plastic-glasses-001";
+    }
     if (id.includes("bottle") || id.includes("bamboo")) {
       return "1";
     }
@@ -394,7 +559,7 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
       return "4";
     }
     if (id.includes("power") || id.includes("solar") || id.includes("bank")) {
-      return "5";
+      return "solar-power-bank-001";
     }
     if (id.includes("perfume") || id.includes("fragrance") || id.includes("cologne")) {
       return "perfume";
@@ -407,8 +572,8 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
       }
     }
     
-    // Default case
-    return "perfume";
+    console.log(`Could not determine product type for ID: ${id}, using default`);
+    return "perfume"; // Default fallback
   };
   
   // Determine product type
@@ -416,7 +581,7 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
   console.log(`Determined product type for ${normalizedProductId}: ${productType}`);
   
   const { data: materials = [], isLoading: materialsLoading, error: materialsError } = useQuery({
-    queryKey: ['material-analysis', normalizedProductId],
+    queryKey: ['material-analysis', normalizedProductId, productType],
     queryFn: async () => {
       console.log(`Checking materials for product ${normalizedProductId}, determined type: ${productType}`);
       
@@ -437,14 +602,21 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
         throw error;
       }
       
-      // If no materials found, try to use a fallback based on product ID keywords
+      // If no materials found, try to use a fallback based on partial product ID matching
       if (!data || data.length === 0) {
-        // Look for product type clues in the ID
+        // Try to find a match based on partial ID
         for (const [key, value] of Object.entries(predefinedMaterials)) {
           if (normalizedProductId.toLowerCase().includes(key.toLowerCase())) {
             console.log(`No specific data found, using materials for ${key} as fallback`);
             return value;
           }
+        }
+        
+        // If we can't find anything, use a default based on product type guessing
+        const guessedType = determineProductType(normalizedProductId);
+        if (predefinedMaterials[guessedType]) {
+          console.log(`Using guessed product type ${guessedType} materials as fallback`);
+          return predefinedMaterials[guessedType];
         }
         
         console.log(`No data found, using perfume materials as fallback`);
@@ -505,7 +677,7 @@ const MaterialAnalysis = ({ productId }: MaterialAnalysisProps) => {
   }
 
   // Get the relevant product description
-  const productDescription = productDescriptions[productType] || productDescriptions[determineProductType(normalizedProductId)];
+  const productDescription = productDescriptions[productType] || productDescriptions[determineProductType(normalizedProductId)] || `Product material analysis`;
 
   return (
     <div className="space-y-4">

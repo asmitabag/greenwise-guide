@@ -57,12 +57,32 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
   
   const filteredMaterials = getFilteredMaterials();
   
+  // Choose product image based on product name if not provided by type
+  const getImageFromName = () => {
+    if (productName.includes("Disposable Camera") || productName.includes("SnapQuick")) {
+      return "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80";
+    }
+    if (productName.includes("FastGlam") || productName.includes("Party Dress")) {
+      return "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80";
+    }
+    if (productName.includes("Sunglasses") || productName.includes("TrendEye")) {
+      return "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80";
+    }
+    if (productName.includes("Solar") || productName.includes("Power Bank")) {
+      return "https://images.unsplash.com/photo-1594131975464-8a26d4ad3f7f?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    return null;
+  };
+  
+  // Use product image from type or from name if available
+  const finalProductImage = productImage || getImageFromName();
+  
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg">
       <div className="flex gap-4 items-center">
-        {productImage && (
+        {finalProductImage && (
           <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100 shrink-0">
-            <img src={productImage} alt={productName} className="w-full h-full object-cover" />
+            <img src={finalProductImage} alt={productName} className="w-full h-full object-cover" />
           </div>
         )}
         <div>
