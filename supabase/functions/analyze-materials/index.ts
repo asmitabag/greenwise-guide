@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -153,7 +154,7 @@ const predefinedMaterials = {
   // Perfume with accurate ingredients specific to fragrances
   "perfume": {
     materials: [
-      { name: "Alcohol (Denatured)", percentage: 79.2, eco_score: 5, sustainable: true, 
+      { name: "Alcohol (Denatured)", percentage: 79.2, eco_score: 5, sustainable: false, 
         details: "Primary solvent base derived from plant fermentation" },
       { name: "Perfume Compounds", percentage: 15, eco_score: 4, sustainable: false, 
         details: "Synthetic and natural aromatic compounds for fragrance" },
@@ -188,6 +189,134 @@ const predefinedMaterials = {
       energy_efficiency: 40,
       biodegradable_percentage: 82
     }
+  },
+  // FastGlam Party Dress
+  "fast-fashion-dress-001": {
+    materials: [
+      { name: "Polyester", percentage: 75, eco_score: 2, sustainable: false, 
+        details: "Synthetic petroleum-based fabric with high environmental impact" },
+      { name: "Plastic Sequins", percentage: 15, eco_score: 1, sustainable: false, 
+        details: "Non-biodegradable microplastics that contribute to pollution" },
+      { name: "Synthetic Fiber", percentage: 10, eco_score: 2, sustainable: false, 
+        details: "Petroleum-based fibers that shed microplastics during washing" }
+    ],
+    eco_score: 1.8,
+    warnings: [
+      "Made from non-renewable petroleum-based materials",
+      "Sheds microplastics during washing that pollute waterways",
+      "Sequins are non-biodegradable and difficult to recycle",
+      "Short lifespan due to trend-focused design",
+      "Manufacturing involves high water usage and chemical treatments"
+    ],
+    recommendations: [
+      "Opt for natural fiber clothing without plastic embellishments",
+      "Choose timeless designs that won't quickly go out of fashion",
+      "Consider secondhand or rental options for occasion wear",
+      "Wash synthetic clothing in a microplastic-catching laundry bag",
+      "Look for brands with transparent supply chains and fair labor practices"
+    ],
+    metrics: {
+      water_saved: 0,
+      energy_efficiency: 20,
+      biodegradable_percentage: 0
+    }
+  },
+  // SnapQuick Disposable Camera
+  "disposable-camera-001": {
+    materials: [
+      { name: "Plastic Housing", percentage: 60, eco_score: 2, sustainable: false, 
+        details: "Single-use plastic body designed for disposal after use" },
+      { name: "Electronic Components", percentage: 20, eco_score: 2, sustainable: false, 
+        details: "Circuit boards and flash mechanism containing heavy metals" },
+      { name: "Batteries", percentage: 10, eco_score: 1, sustainable: false, 
+        details: "Contains toxic chemicals and heavy metals requiring special disposal" },
+      { name: "Photographic Chemicals", percentage: 10, eco_score: 2, sustainable: false, 
+        details: "Film processing chemicals harmful to aquatic environments" }
+    ],
+    eco_score: 1.9,
+    warnings: [
+      "Single-use design creates significant waste",
+      "Contains electronic components and batteries that require special disposal",
+      "Processing chemicals can be harmful to ecosystems if improperly disposed",
+      "Plastic body will persist in the environment for hundreds of years",
+      "Manufacturing process has high carbon and water footprint"
+    ],
+    recommendations: [
+      "Use a digital camera or smartphone for photography",
+      "If disposable aesthetics are desired, use a reusable film camera",
+      "Ensure proper recycling through electronics waste programs",
+      "Consider apps that replicate film photography effects",
+      "Look for camera rental services for special occasions"
+    ],
+    metrics: {
+      water_saved: 0,
+      energy_efficiency: 10,
+      biodegradable_percentage: 0
+    }
+  },
+  // TrendEye Colorful Sunglasses
+  "plastic-glasses-001": {
+    materials: [
+      { name: "Acrylic Plastic", percentage: 85, eco_score: 2, sustainable: false, 
+        details: "Petroleum-based plastic with high environmental footprint" },
+      { name: "Metal Hinges", percentage: 5, eco_score: 4, sustainable: false, 
+        details: "Small metal components with medium recyclability" },
+      { name: "Synthetic Dyes", percentage: 10, eco_score: 2, sustainable: false, 
+        details: "Chemical colorants with potential water pollution impact" }
+    ],
+    eco_score: 2.2,
+    warnings: [
+      "Made from non-renewable petroleum-based plastics",
+      "Difficult to recycle due to mixed materials",
+      "Short lifespan due to fragile construction and trend-focused design",
+      "Synthetic dyes can contain harmful chemicals",
+      "Manufacturing process involves high carbon emissions"
+    ],
+    recommendations: [
+      "Invest in quality sunglasses with a longer lifespan",
+      "Look for sunglasses made from recycled or bio-based materials",
+      "Choose classic styles that won't quickly go out of fashion",
+      "Repair broken sunglasses rather than replacing them",
+      "Purchase from brands offering take-back recycling programs"
+    ],
+    metrics: {
+      water_saved: 0,
+      energy_efficiency: 25,
+      biodegradable_percentage: 0
+    }
+  },
+  // EcoCharge Solar Power Bank
+  "solar-power-bank-001": {
+    materials: [
+      { name: "Recycled Aluminum", percentage: 40, eco_score: 7, sustainable: true, 
+        details: "Durable casing made from post-consumer aluminum" },
+      { name: "Silicon Solar Panels", percentage: 20, eco_score: 6, sustainable: true, 
+        details: "Renewable energy technology with medium production impact" },
+      { name: "Lithium-ion Battery", percentage: 35, eco_score: 3, sustainable: false, 
+        details: "Energy storage with significant mining impact" },
+      { name: "Recycled Plastic", percentage: 5, eco_score: 5, sustainable: true, 
+        details: "Used for smaller components" }
+    ],
+    eco_score: 5.2,
+    warnings: [
+      "Contains lithium-ion battery which requires special disposal",
+      "Solar panel production has significant initial carbon footprint",
+      "Electronic components contain various metals requiring proper recycling",
+      "Potential conflict minerals in electronic components",
+      "Limited repairability due to sealed construction"
+    ],
+    recommendations: [
+      "Use the solar charging feature frequently to maximize environmental benefits",
+      "Extend product lifespan through proper care and storage",
+      "Ensure proper recycling through electronics waste programs",
+      "Look for manufacturers with transparent supply chains",
+      "Consider a hand-crank alternative for occasional emergency use"
+    ],
+    metrics: {
+      water_saved: 500,
+      energy_efficiency: 65,
+      biodegradable_percentage: 5
+    }
   }
 };
 
@@ -203,7 +332,11 @@ const productIdToType = {
   "organic-cotton-shirt": "organic-cotton-shirt", 
   "natural-face-cream": "natural-face-cream",
   "recycled-coffee-cup": "recycled-coffee-cup",
-  "solar-power-bank": "solar-power-bank"
+  "solar-power-bank": "solar-power-bank",
+  "fast-fashion-dress-001": "fast-fashion-dress-001",
+  "disposable-camera-001": "disposable-camera-001",
+  "plastic-glasses-001": "plastic-glasses-001",
+  "solar-power-bank-001": "solar-power-bank-001"
 };
 
 // Function to call Google Cloud Vision API for image analysis
@@ -340,11 +473,19 @@ function mapLabelsToMaterials(visionResult: any) {
   const isClothing = allDetections.some(label => 
     label.includes("clothing") || label.includes("textile") || label.includes("fabric") || 
     label.includes("shirt") || label.includes("dress"));
+  const isElectronic = allDetections.some(label => 
+    label.includes("electronic") || label.includes("device") || label.includes("camera") || 
+    label.includes("battery") || label.includes("solar"));
+  const isPlastic = allDetections.some(label => 
+    label.includes("plastic") || label.includes("acrylic") || label.includes("polymer"));
   
-  if (isBottle && detectedMaterials.some(m => m.includes("plastic"))) {
+  // Add specific product materials based on detected categories
+  if (isBottle && isPlastic) {
     detectedMaterials.push("plastic bottle");
   } else if (isBottle && detectedMaterials.some(m => m.includes("glass"))) {
     detectedMaterials.push("glass bottle");
+  } else if (isBottle && detectedMaterials.some(m => m.includes("bamboo"))) {
+    detectedMaterials.push("bamboo bottle");
   }
   
   if (isCosmetic) {
@@ -358,10 +499,53 @@ function mapLabelsToMaterials(visionResult: any) {
         detectedMaterials.push("alcohol");  // Common in perfumes
       }
     }
+    
+    // For creams/skincare
+    if (allDetections.some(label => label.includes("cream") || label.includes("lotion"))) {
+      detectedMaterials.push("face cream");
+      if (!detectedMaterials.some(m => m.includes("aloe") || m.includes("oil"))) {
+        detectedMaterials.push("aloe vera");
+        detectedMaterials.push("natural oils");
+      }
+    }
   }
   
   if (isClothing) {
     detectedMaterials.push("textile");
+    // Check for specific clothing materials
+    if (allDetections.some(label => label.includes("polyester") || label.includes("synthetic"))) {
+      detectedMaterials.push("polyester fabric");
+    } else if (allDetections.some(label => label.includes("cotton"))) {
+      detectedMaterials.push("cotton fabric");
+    }
+    
+    // Check for clothing accessories
+    if (allDetections.some(label => label.includes("sequin") || label.includes("glitter"))) {
+      detectedMaterials.push("plastic sequins");
+    }
+  }
+  
+  if (isElectronic) {
+    detectedMaterials.push("electronic components");
+    
+    // For cameras
+    if (allDetections.some(label => label.includes("camera"))) {
+      detectedMaterials.push("camera components");
+      detectedMaterials.push("electronic components");
+      detectedMaterials.push("plastic housing");
+      if (!detectedMaterials.includes("battery")) {
+        detectedMaterials.push("battery");
+      }
+    }
+    
+    // For solar products
+    if (allDetections.some(label => label.includes("solar"))) {
+      detectedMaterials.push("solar panel");
+      detectedMaterials.push("silicon");
+      if (!detectedMaterials.includes("battery")) {
+        detectedMaterials.push("lithium-ion battery");
+      }
+    }
   }
   
   // Clean up and remove duplicates
@@ -373,7 +557,7 @@ function mapLabelsToMaterials(visionResult: any) {
   // Sustainable materials increase score
   const sustainableMaterials = ["bamboo", "cotton", "wool", "natural", "organic", "recycled", "biodegradable"];
   // Unsustainable materials decrease score
-  const unsustainableMaterials = ["plastic", "synthetic", "pvc", "chemical", "acrylic"];
+  const unsustainableMaterials = ["plastic", "synthetic", "pvc", "chemical", "acrylic", "battery", "electronic"];
   
   // Count sustainable vs unsustainable materials
   const sustainableCount = uniqueMaterials.filter(m => 
@@ -387,12 +571,36 @@ function mapLabelsToMaterials(visionResult: any) {
   ecoScore = 2 + (7 * (sustainableCount / totalRelevantMaterials));
   ecoScore = Math.min(9.5, Math.max(2.0, ecoScore)); // Clamp between 2.0-9.5
   
+  // Determine product type from detected materials and labels
+  let inferredProductType = null;
+  
+  if (allDetections.some(label => label.includes("dress") || label.includes("fashion"))) {
+    inferredProductType = "fast-fashion-dress-001";
+  } else if (allDetections.some(label => label.includes("camera"))) {
+    inferredProductType = "disposable-camera-001";
+  } else if (allDetections.some(label => label.includes("sunglasses") || label.includes("glasses"))) {
+    inferredProductType = "plastic-glasses-001";
+  } else if (allDetections.some(label => label.includes("solar") || label.includes("power bank"))) {
+    inferredProductType = "solar-power-bank-001";
+  } else if (allDetections.some(label => label.includes("perfume") || label.includes("fragrance"))) {
+    inferredProductType = "perfume";
+  } else if (allDetections.some(label => label.includes("cream") || label.includes("skincare"))) {
+    inferredProductType = "natural-face-cream";
+  } else if (allDetections.some(label => label.includes("bamboo") || label.includes("bottle"))) {
+    inferredProductType = "bamboo-water-bottle";
+  } else if (allDetections.some(label => label.includes("cotton") || label.includes("shirt"))) {
+    inferredProductType = "organic-cotton-shirt";
+  } else if (allDetections.some(label => label.includes("coffee") || label.includes("cup"))) {
+    inferredProductType = "recycled-coffee-cup";
+  }
+  
   return {
     materials: uniqueMaterials,
     eco_score: ecoScore,
     labels: labels,
     objects: objects,
-    textResults: textResults.length > 0 ? textResults[0].description : null
+    textResults: textResults.length > 0 ? textResults[0].description : null,
+    inferredProductType: inferredProductType
   };
 }
 
@@ -410,6 +618,8 @@ function analyzeMaterials(imageData: string, fileName?: string, productId?: stri
     return predefinedMaterials[productType as keyof typeof predefinedMaterials];
   }
   
+  // Try to infer product type from filename or id
+  
   // Check if this is a perfume scan based on the filename
   const isPerfume = fileName?.toLowerCase().includes('perfume') || 
                     fileName?.toLowerCase().includes('fragrance') || 
@@ -419,6 +629,54 @@ function analyzeMaterials(imageData: string, fileName?: string, productId?: stri
   if (isPerfume) {
     console.log("Detected perfume product");
     return predefinedMaterials.perfume;
+  }
+  
+  // Check if this is a fashion item based on the filename
+  const isFashion = fileName?.toLowerCase().includes('dress') || 
+                   fileName?.toLowerCase().includes('fashion') || 
+                   fileName?.toLowerCase().includes('clothing') ||
+                   productId?.includes("dress") || 
+                   productId?.includes("fashion");
+  
+  if (isFashion) {
+    console.log("Detected fashion product");
+    return predefinedMaterials["fast-fashion-dress-001"];
+  }
+  
+  // Check if this is a camera based on the filename
+  const isCamera = fileName?.toLowerCase().includes('camera') || 
+                   fileName?.toLowerCase().includes('photo') || 
+                   fileName?.toLowerCase().includes('disposable') ||
+                   productId?.includes("camera") || 
+                   productId?.includes("disposable");
+  
+  if (isCamera) {
+    console.log("Detected camera product");
+    return predefinedMaterials["disposable-camera-001"];
+  }
+  
+  // Check if this is sunglasses based on the filename
+  const isGlasses = fileName?.toLowerCase().includes('glass') || 
+                    fileName?.toLowerCase().includes('sunglass') || 
+                    fileName?.toLowerCase().includes('eyewear') ||
+                    productId?.includes("glass") || 
+                    productId?.includes("sunglass");
+  
+  if (isGlasses) {
+    console.log("Detected sunglasses product");
+    return predefinedMaterials["plastic-glasses-001"];
+  }
+  
+  // Check if this is a power bank based on the filename
+  const isPowerBank = fileName?.toLowerCase().includes('power') || 
+                      fileName?.toLowerCase().includes('solar') || 
+                      fileName?.toLowerCase().includes('charger') ||
+                      productId?.includes("power") || 
+                      productId?.includes("solar");
+  
+  if (isPowerBank) {
+    console.log("Detected power bank product");
+    return predefinedMaterials["solar-power-bank-001"];
   }
   
   // Check if this is a specific product with predefined data
@@ -452,7 +710,7 @@ function analyzeMaterials(imageData: string, fileName?: string, productId?: stri
       return predefinedMaterials["recycled-coffee-cup"];
     }
     if (productId.toLowerCase().includes('power') || productId.toLowerCase().includes('solar')) {
-      return predefinedMaterials["solar-power-bank"];
+      return predefinedMaterials["solar-power-bank-001"];
     }
   }
   
@@ -473,7 +731,16 @@ function analyzeMaterials(imageData: string, fileName?: string, productId?: stri
       return predefinedMaterials["recycled-coffee-cup"];
     }
     else if (lowerFileName.includes("power") || lowerFileName.includes("solar") || lowerFileName.includes("bank")) {
-      return predefinedMaterials["solar-power-bank"];
+      return predefinedMaterials["solar-power-bank-001"];
+    }
+    else if (lowerFileName.includes("dress") || lowerFileName.includes("fashion") || lowerFileName.includes("clothing")) {
+      return predefinedMaterials["fast-fashion-dress-001"];
+    }
+    else if (lowerFileName.includes("camera") || lowerFileName.includes("photo") || lowerFileName.includes("snap")) {
+      return predefinedMaterials["disposable-camera-001"];
+    }
+    else if (lowerFileName.includes("glass") || lowerFileName.includes("sunglass") || lowerFileName.includes("eye")) {
+      return predefinedMaterials["plastic-glasses-001"];
     }
     // Default to perfume if no other matches found
     else {
@@ -560,13 +827,38 @@ serve(async (req) => {
         // Map the vision results to our materials format
         const materialResults = mapLabelsToMaterials(visionResult);
         
+        // Use the inferred product type from image analysis if available
+        const inferredProductType = materialResults.inferredProductType;
+        console.log("Inferred product type from image:", inferredProductType);
+        
+        // Determine which product type to use based on priority:
+        // 1. Directly specified productType
+        // 2. Inferred from vision analysis
+        // 3. Determined from productId
+        // 4. Default to perfume
+        let effectiveProductType = productType;
+        
+        if (!effectiveProductType && inferredProductType) {
+          effectiveProductType = inferredProductType;
+        } else if (!effectiveProductType && productId) {
+          for (const [id, type] of Object.entries(productIdToType)) {
+            if (productId.includes(id)) {
+              effectiveProductType = type;
+              break;
+            }
+          }
+        }
+        
+        if (!effectiveProductType) {
+          effectiveProductType = "perfume"; // Default
+        }
+        
+        console.log("Using effective product type:", effectiveProductType);
+        
         // Combine with our predefined materials for the known product type if available
         let baseResult = {};
-        if (productType && predefinedMaterials[productType as keyof typeof predefinedMaterials]) {
-          baseResult = predefinedMaterials[productType as keyof typeof predefinedMaterials];
-        } else if (productId && productIdToType[productId as keyof typeof productIdToType]) {
-          const type = productIdToType[productId as keyof typeof productIdToType];
-          baseResult = predefinedMaterials[type as keyof typeof predefinedMaterials];
+        if (effectiveProductType && predefinedMaterials[effectiveProductType as keyof typeof predefinedMaterials]) {
+          baseResult = predefinedMaterials[effectiveProductType as keyof typeof predefinedMaterials];
         }
         
         // Return combined results with the raw vision data for debugging
@@ -575,6 +867,7 @@ serve(async (req) => {
             ...baseResult,
             materials: materialResults.materials,
             eco_score: materialResults.eco_score,
+            actualProductId: effectiveProductType, // Use as product ID for consistent analysis
             visionData: {
               labelAnnotations: materialResults.labels,
               objectAnnotations: materialResults.objects,

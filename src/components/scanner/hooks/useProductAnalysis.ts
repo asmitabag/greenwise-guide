@@ -15,11 +15,11 @@ export const useProductAnalysis = (productId: string) => {
   const determineTypeFromMaterials = (materials: string[]) => {
     if (materials.some(m => m.toLowerCase().includes('polyester') || m.toLowerCase().includes('sequin'))) {
       return "fast-fashion-dress-001";
-    } else if (materials.some(m => m.toLowerCase().includes('camera') || m.toLowerCase().includes('battery'))) {
+    } else if (materials.some(m => m.toLowerCase().includes('camera') || m.toLowerCase().includes('battery') || m.toLowerCase().includes('electronic'))) {
       return "disposable-camera-001";
     } else if (materials.some(m => m.toLowerCase().includes('acrylic') || m.toLowerCase().includes('sunglass'))) {
       return "plastic-glasses-001";
-    } else if (materials.some(m => m.toLowerCase().includes('alcohol') || m.toLowerCase().includes('fragrance'))) {
+    } else if (materials.some(m => m.toLowerCase().includes('alcohol') || m.toLowerCase().includes('fragrance') || m.toLowerCase().includes('perfume'))) {
       return "perfume";
     } else if (materials.some(m => m.toLowerCase().includes('bamboo'))) {
       return "bamboo-water-bottle";
@@ -53,6 +53,26 @@ export const useProductAnalysis = (productId: string) => {
     if (id.includes("glass") || id.includes("sunglass") || id.includes("trend") || id.includes("eye")) {
       return "plastic-glasses-001";
     }
+
+    // Check if ID contains face cream identifiers
+    if (id.includes("cream") || id.includes("face") || id.includes("skin")) {
+      return "natural-face-cream";
+    }
+
+    // Check if ID contains t-shirt identifiers
+    if (id.includes("shirt") || id.includes("tee") || id.includes("cotton")) {
+      return "organic-cotton-shirt";
+    }
+
+    // Check if ID contains power bank identifiers
+    if (id.includes("power") || id.includes("bank") || id.includes("solar") || id.includes("charger")) {
+      return "solar-power-bank-001";
+    }
+
+    // Check if ID contains fragrance identifiers
+    if (id.includes("perfume") || id.includes("fragrance") || id.includes("cologne")) {
+      return "perfume";
+    }
     
     return null;
   };
@@ -84,25 +104,60 @@ export const useProductAnalysis = (productId: string) => {
     queryFn: async () => {
       console.log(`Analyzing materials for product ${normalizedProductId}, type: ${productType}, with detected materials:`, detectedMaterials);
       
-      // First, check for specific product types by ID
-      if (normalizedProductId.includes("fast") || normalizedProductId.includes("dress") || normalizedProductId.includes("fashion")) {
+      // Match specific key product types first for accurate analysis
+      
+      // FastGlam Party Dress
+      if (normalizedProductId.includes("fast") || normalizedProductId.includes("dress") || normalizedProductId.includes("fashion") || normalizedProductId.includes("glam") || normalizedProductId.includes("party")) {
         console.log("Using FastGlam Party Dress materials");
         return productMaterialMappings["fast-fashion-dress-001"];
       }
       
+      // SnapQuick Disposable Camera
       if (normalizedProductId.includes("camera") || normalizedProductId.includes("disposable") || normalizedProductId.includes("snap")) {
         console.log("Using Disposable Camera materials");
         return productMaterialMappings["disposable-camera-001"];
       }
       
-      if (normalizedProductId.includes("glass") || normalizedProductId.includes("trend") || normalizedProductId.includes("eye")) {
+      // TrendEye Sunglasses
+      if (normalizedProductId.includes("glass") || normalizedProductId.includes("trend") || normalizedProductId.includes("eye") || normalizedProductId.includes("sunglass")) {
         console.log("Using Sunglasses materials");
         return productMaterialMappings["plastic-glasses-001"];
       }
       
-      if (normalizedProductId === "solar-power-bank-001") {
-        console.log("Using Solar Power Bank materials by exact ID match");
+      // Solar Power Bank
+      if (normalizedProductId.includes("solar") || normalizedProductId.includes("power") || normalizedProductId.includes("bank") || normalizedProductId === "solar-power-bank-001") {
+        console.log("Using Solar Power Bank materials");
         return productMaterialMappings["solar-power-bank-001"];
+      }
+      
+      // Natural Face Cream
+      if (normalizedProductId.includes("cream") || normalizedProductId.includes("face") || normalizedProductId.includes("skin")) {
+        console.log("Using Natural Face Cream materials");
+        return productMaterialMappings["3"];
+      }
+      
+      // Organic Cotton T-shirt
+      if (normalizedProductId.includes("cotton") || normalizedProductId.includes("shirt") || normalizedProductId.includes("tee")) {
+        console.log("Using Organic Cotton T-shirt materials");
+        return productMaterialMappings["2"];
+      }
+      
+      // Bamboo Water Bottle
+      if (normalizedProductId.includes("bamboo") || normalizedProductId.includes("bottle") || normalizedProductId.includes("water")) {
+        console.log("Using Bamboo Water Bottle materials");
+        return productMaterialMappings["1"];
+      }
+      
+      // Recycled Coffee Cup
+      if (normalizedProductId.includes("coffee") || normalizedProductId.includes("cup") || normalizedProductId.includes("recycled")) {
+        console.log("Using Recycled Coffee Cup materials");
+        return productMaterialMappings["4"];
+      }
+      
+      // Perfume
+      if (normalizedProductId.includes("perfume") || normalizedProductId.includes("fragrance") || normalizedProductId.includes("cologne")) {
+        console.log("Using Perfume materials");
+        return productMaterialMappings["perfume"];
       }
       
       // Try to get materials from our predefined mappings based on product type
@@ -113,6 +168,52 @@ export const useProductAnalysis = (productId: string) => {
       
       // If no type determined yet but we have detected materials, try to infer type
       if (detectedMaterials.length > 0) {
+        // Check specific material keywords to determine product type
+        if (detectedMaterials.some(m => m.toLowerCase().includes('perfume') || m.toLowerCase().includes('fragrance') || m.toLowerCase().includes('alcohol'))) {
+          console.log("Detected materials suggest perfume");
+          return productMaterialMappings["perfume"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('polyester') || m.toLowerCase().includes('sequin'))) {
+          console.log("Detected materials suggest fashion dress");
+          return productMaterialMappings["fast-fashion-dress-001"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('camera') || m.toLowerCase().includes('battery'))) {
+          console.log("Detected materials suggest disposable camera");
+          return productMaterialMappings["disposable-camera-001"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('solar') || m.toLowerCase().includes('lithium'))) {
+          console.log("Detected materials suggest solar power bank");
+          return productMaterialMappings["solar-power-bank-001"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('plastic') || m.toLowerCase().includes('acrylic'))) {
+          console.log("Detected materials suggest plastic sunglasses");
+          return productMaterialMappings["plastic-glasses-001"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('bamboo'))) {
+          console.log("Detected materials suggest bamboo water bottle");
+          return productMaterialMappings["1"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('cotton'))) {
+          console.log("Detected materials suggest cotton t-shirt");
+          return productMaterialMappings["2"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('aloe') || m.toLowerCase().includes('cream'))) {
+          console.log("Detected materials suggest face cream");
+          return productMaterialMappings["3"];
+        }
+        
+        if (detectedMaterials.some(m => m.toLowerCase().includes('paper') || m.toLowerCase().includes('cup'))) {
+          console.log("Detected materials suggest recycled coffee cup");
+          return productMaterialMappings["4"];
+        }
+        
         const inferredType = determineTypeFromMaterials(detectedMaterials);
         if (inferredType && productMaterialMappings[inferredType]) {
           console.log(`Inferred type from materials: ${inferredType}`);
@@ -140,36 +241,10 @@ export const useProductAnalysis = (productId: string) => {
         console.error("Database lookup failed:", err);
       }
       
-      // Last resort: use default materials based on product ID keywords
-      if (normalizedProductId.includes("bottle") || normalizedProductId.includes("bamboo")) {
-        console.log("Using bamboo water bottle materials based on ID keywords");
-        return productMaterialMappings["1"];
-      }
-      
-      if (normalizedProductId.includes("shirt") || normalizedProductId.includes("cotton")) {
-        console.log("Using organic cotton t-shirt materials based on ID keywords");
-        return productMaterialMappings["2"];
-      }
-      
-      if (normalizedProductId.includes("cream") || normalizedProductId.includes("face")) {
-        console.log("Using natural face cream materials based on ID keywords");
-        return productMaterialMappings["3"];
-      }
-      
-      if (normalizedProductId.includes("coffee") || normalizedProductId.includes("cup")) {
-        console.log("Using recycled coffee cup materials based on ID keywords");
-        return productMaterialMappings["4"];
-      }
-      
-      if (normalizedProductId.includes("solar") || normalizedProductId.includes("power") || normalizedProductId.includes("bank")) {
-        console.log("Using solar power bank materials based on ID keywords");
-        return productMaterialMappings["solar-power-bank-001"];
-      }
-      
-      // Generic material based on what was detected
+      // Last resort: use default materials based on product ID or detected materials
       if (hasDetectedPlastic) {
         console.log("Using plastic-based default materials");
-        return productMaterialMappings["plastic-glasses-001"]; // Use plastic glasses as fallback for plastic
+        return productMaterialMappings["plastic-glasses-001"]; 
       }
       
       // If all else fails, use perfume as default

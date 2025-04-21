@@ -1,7 +1,8 @@
 
 // Product mappings and utility functions for analysis
 export const productMaterialMappings = {
-  "1": [ // Bamboo Water Bottle
+  // Bamboo Water Bottle - ID: 1
+  "1": [ 
     { 
       id: "1-1",
       name: "Bamboo", 
@@ -42,7 +43,8 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
-  "2": [ // Organic Cotton T-shirt
+  // Organic Cotton T-shirt - ID: 2
+  "2": [ 
     { 
       id: "2-1",
       name: "Organic Cotton", 
@@ -59,7 +61,7 @@ export const productMaterialMappings = {
     { 
       id: "2-2",
       name: "Natural Dyes", 
-      percentage: 5, 
+      percentage: 3, 
       eco_score: 8.0, 
       sustainable: true, 
       details: "Plant-based coloring with low environmental impact",
@@ -68,9 +70,23 @@ export const productMaterialMappings = {
       recyclability_rating: 6,
       biodegradability_rating: 8,
       certification_ids: ["cert-4"]
+    },
+    { 
+      id: "2-3",
+      name: "Elastane", 
+      percentage: 2, 
+      eco_score: 4.0, 
+      sustainable: false, 
+      details: "Small amount added for shape retention",
+      carbon_footprint: 4.5,
+      water_usage: 120,
+      recyclability_rating: 3,
+      biodegradability_rating: 2,
+      certification_ids: []
     }
   ],
-  "3": [ // Natural Face Cream
+  // Natural Face Cream - ID: 3
+  "3": [ 
     { 
       id: "3-1",
       name: "Aloe Vera Extract", 
@@ -124,7 +140,8 @@ export const productMaterialMappings = {
       certification_ids: ["cert-3"]
     }
   ],
-  "4": [ // Recycled Coffee Cup
+  // Recycled Coffee Cup - ID: 4
+  "4": [ 
     { 
       id: "4-1",
       name: "Recycled Paper", 
@@ -165,7 +182,8 @@ export const productMaterialMappings = {
       certification_ids: ["cert-4"]
     }
   ],
-  "5": [ // Solar Power Bank
+  // Solar Power Bank - ID: 5
+  "5": [ 
     { 
       id: "5-1",
       name: "Recycled Aluminum", 
@@ -219,11 +237,12 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
-  "perfume": [ // Fragrance
+  // Perfume with detailed fragrance-specific materials
+  "perfume": [ 
     { 
       id: "perfume-1",
-      name: "Alcohol", 
-      percentage: 80, 
+      name: "Alcohol (Denatured)", 
+      percentage: 79.2, 
       eco_score: 5.0, 
       sustainable: false, 
       details: "Main carrier for fragrance compounds",
@@ -235,11 +254,11 @@ export const productMaterialMappings = {
     },
     { 
       id: "perfume-2",
-      name: "Essential Oils", 
+      name: "Perfume Compounds", 
       percentage: 15, 
-      eco_score: 7.0, 
-      sustainable: true, 
-      details: "Natural fragrance compounds from plants",
+      eco_score: 4.0, 
+      sustainable: false, 
+      details: "Synthetic fragrance ingredients",
       carbon_footprint: 3.8,
       water_usage: 120,
       recyclability_rating: 3,
@@ -248,19 +267,85 @@ export const productMaterialMappings = {
     },
     { 
       id: "perfume-3",
-      name: "Glass Bottle", 
-      percentage: 5, 
-      eco_score: 6.5, 
-      sustainable: true, 
-      details: "Recyclable container material",
+      name: "Di-ethyl Phthalate", 
+      percentage: 2.5, 
+      eco_score: 2.0, 
+      sustainable: false, 
+      details: "Chemical fixative with environmental concerns",
       carbon_footprint: 5.1,
       water_usage: 95,
       recyclability_rating: 2,
       biodegradability_rating: 2,
       certification_ids: []
+    },
+    { 
+      id: "perfume-4",
+      name: "Tertiary Butyl Alcohol", 
+      percentage: 0.5, 
+      eco_score: 3.0, 
+      sustainable: false, 
+      details: "Denaturant to make alcohol undrinkable",
+      carbon_footprint: 3.9,
+      water_usage: 110,
+      recyclability_rating: 4,
+      biodegradability_rating: 5,
+      certification_ids: []
+    },
+    { 
+      id: "perfume-5",
+      name: "Linalool", 
+      percentage: 1.2, 
+      eco_score: 6.0, 
+      sustainable: true, 
+      details: "Natural terpene alcohol from plants",
+      carbon_footprint: 1.8,
+      water_usage: 65,
+      recyclability_rating: 6,
+      biodegradability_rating: 7,
+      certification_ids: ["cert-4"]
+    },
+    { 
+      id: "perfume-6",
+      name: "Alpha-Isomethyl Ionone", 
+      percentage: 0.8, 
+      eco_score: 4.0, 
+      sustainable: false, 
+      details: "Synthetic floral fragrance ingredient",
+      carbon_footprint: 4.2,
+      water_usage: 80,
+      recyclability_rating: 3,
+      biodegradability_rating: 4,
+      certification_ids: []
+    },
+    { 
+      id: "perfume-7",
+      name: "Citral", 
+      percentage: 0.5, 
+      eco_score: 7.0, 
+      sustainable: true, 
+      details: "Natural compound from citrus oils",
+      carbon_footprint: 1.5,
+      water_usage: 40,
+      recyclability_rating: 6,
+      biodegradability_rating: 7,
+      certification_ids: ["cert-4"]
+    },
+    { 
+      id: "perfume-8",
+      name: "Hydroxycitronellal", 
+      percentage: 0.3, 
+      eco_score: 4.0, 
+      sustainable: false, 
+      details: "Synthetic floral fragrance ingredient",
+      carbon_footprint: 3.7,
+      water_usage: 75,
+      recyclability_rating: 3,
+      biodegradability_rating: 4,
+      certification_ids: []
     }
   ],
-  "fast-fashion-dress-001": [ // FastGlam Party Dress
+  // FastGlam Party Dress with detailed fashion materials
+  "fast-fashion-dress-001": [ 
     { 
       id: "fd-1",
       name: "Polyester", 
@@ -301,7 +386,8 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
-  "disposable-camera-001": [ // SnapQuick Disposable Camera
+  // SnapQuick Disposable Camera Kit with detailed camera materials
+  "disposable-camera-001": [ 
     { 
       id: "dc-1",
       name: "Plastic Housing", 
@@ -355,7 +441,8 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
-  "plastic-glasses-001": [ // TrendEye Colorful Sunglasses
+  // TrendEye Colorful Sunglasses with detailed eyewear materials
+  "plastic-glasses-001": [ 
     { 
       id: "pg-1",
       name: "Acrylic Plastic", 
@@ -396,7 +483,8 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
-  "solar-power-bank-001": [ // EcoCharge Solar Power Bank
+  // EcoCharge Solar Power Bank with detailed electronics materials
+  "solar-power-bank-001": [ 
     { 
       id: "spb-1",
       name: "Recycled Aluminum", 
@@ -450,7 +538,8 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
-  "plastic": [ // Generic plastic product
+  // Generic plastic product for anything plastic-based
+  "plastic": [ 
     { 
       id: "plastic-1",
       name: "Plastic", 

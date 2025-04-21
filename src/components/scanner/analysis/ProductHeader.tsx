@@ -71,6 +71,15 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
     if (productName.includes("Solar") || productName.includes("Power Bank")) {
       return "https://images.unsplash.com/photo-1594131975464-8a26d4ad3f7f?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
+    if (productName.includes("Face Cream") || productName.includes("Natural Face")) {
+      return "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    if (productName.includes("Cotton") || productName.includes("T-shirt")) {
+      return "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    if (productName.includes("Perfume") || productName.includes("Fragrance")) {
+      return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
     return null;
   };
   
