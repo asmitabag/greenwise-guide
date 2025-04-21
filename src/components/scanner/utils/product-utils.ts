@@ -1,3 +1,4 @@
+
 // Product mappings and utility functions for analysis
 export const productMaterialMappings = {
   // Bamboo Water Bottle - ID: 1
@@ -325,6 +326,29 @@ export const productMaterialMappings = {
   ]
 };
 
+// Add named aliases for each product type to ensure proper mapping
+productMaterialMappings["bamboo-water-bottle"] = productMaterialMappings["1"];
+productMaterialMappings["organic-cotton-shirt"] = productMaterialMappings["2"];
+productMaterialMappings["natural-face-cream"] = productMaterialMappings["3"];
+productMaterialMappings["recycled-coffee-cup"] = productMaterialMappings["4"];
+productMaterialMappings["solar-power-bank"] = productMaterialMappings["5"];
+productMaterialMappings["toothbrush"] = productMaterialMappings["biodegradable-bamboo-toothbrush"];
+productMaterialMappings["bamboo-toothbrush"] = productMaterialMappings["biodegradable-bamboo-toothbrush"];
+productMaterialMappings["shoes"] = productMaterialMappings["recycled-ocean-plastic-shoes"];
+productMaterialMappings["footwear"] = productMaterialMappings["recycled-ocean-plastic-shoes"];
+productMaterialMappings["solar-power-bank-001"] = productMaterialMappings["5"];
+productMaterialMappings["bottle"] = productMaterialMappings["1"];
+productMaterialMappings["water-bottle"] = productMaterialMappings["1"];
+productMaterialMappings["t-shirt"] = productMaterialMappings["2"];
+productMaterialMappings["shirt"] = productMaterialMappings["2"];
+productMaterialMappings["cotton-shirt"] = productMaterialMappings["2"];
+productMaterialMappings["face-cream"] = productMaterialMappings["3"];
+productMaterialMappings["cream"] = productMaterialMappings["3"];
+productMaterialMappings["coffee-cup"] = productMaterialMappings["4"];
+productMaterialMappings["cup"] = productMaterialMappings["4"];
+productMaterialMappings["power-bank"] = productMaterialMappings["5"];
+productMaterialMappings["powerbank"] = productMaterialMappings["5"];
+
 export const productDescriptions = {
   "1": "Bamboo Water Bottle",
   "2": "Organic Cotton T-shirt",
@@ -343,71 +367,91 @@ export const productDescriptions = {
   "plastic-glasses-001": "TrendEye Colorful Sunglasses Set",
   "solar-power-bank-001": "EcoCharge Solar Power Bank",
   "biodegradable-bamboo-toothbrush": "Biodegradable Bamboo Toothbrush",
-  "recycled-ocean-plastic-shoes": "Recycled Ocean Plastic Shoes"
+  "recycled-ocean-plastic-shoes": "Recycled Ocean Plastic Shoes",
+  "bottle": "Bamboo Water Bottle",
+  "water-bottle": "Bamboo Water Bottle",
+  "t-shirt": "Organic Cotton T-shirt",
+  "shirt": "Organic Cotton T-shirt",
+  "cotton-shirt": "Organic Cotton T-shirt",
+  "face-cream": "Natural Face Cream",
+  "cream": "Natural Face Cream",
+  "coffee-cup": "Recycled Coffee Cup",
+  "cup": "Recycled Coffee Cup",
+  "power-bank": "Solar Power Bank",
+  "powerbank": "Solar Power Bank",
+  "toothbrush": "Biodegradable Bamboo Toothbrush",
+  "bamboo-toothbrush": "Biodegradable Bamboo Toothbrush",
+  "shoes": "Recycled Ocean Plastic Shoes",
+  "footwear": "Recycled Ocean Plastic Shoes"
 };
 
 export const determineProductKey = (id: string): string => {
-  // Direct matches
-  if (["1", "2", "3", "4", "5", "perfume", "fast-fashion-dress-001", "disposable-camera-001", 
-       "plastic-glasses-001", "solar-power-bank-001", "biodegradable-bamboo-toothbrush", 
-       "recycled-ocean-plastic-shoes"].includes(id)) {
-    return id;
+  console.log("Determining product key for:", id);
+  const trimmedId = id.trim().toLowerCase();
+  
+  // Direct matches first
+  if (productMaterialMappings[trimmedId]) {
+    console.log(`Found direct match for ${trimmedId}`);
+    return trimmedId;
   }
   
-  // Check for FastGlam party dress
-  if (id.includes("dress") || id.includes("fashion") || id.includes("glam") || id.includes("party")) {
-    return "fast-fashion-dress-001";
+  // Check for keyword matches
+  if (trimmedId.includes("bottle") || (trimmedId.includes("bamboo") && !trimmedId.includes("brush") && !trimmedId.includes("tooth"))) {
+    console.log("Matched as bamboo water bottle");
+    return "bamboo-water-bottle";
   }
-  
-  // Check for disposable camera
-  if (id.includes("camera") || id.includes("snap") || id.includes("disposable")) {
-    return "disposable-camera-001";
-  }
-  
-  // Check for sunglasses
-  if (id.includes("glass") || id.includes("sunglass") || id.includes("trend") || id.includes("eye")) {
-    return "plastic-glasses-001";
-  }
-  
-  // Check for toothbrush
-  if (id.includes("toothbrush") || (id.includes("bamboo") && !id.includes("toothbrush"))) {
+  if (trimmedId.includes("toothbrush") || (trimmedId.includes("bamboo") && (trimmedId.includes("brush") || trimmedId.includes("tooth")))) {
+    console.log("Matched as bamboo toothbrush");
     return "biodegradable-bamboo-toothbrush";
   }
-  
-  // Check for shoes
-  if (id.includes("shoes") || id.includes("footwear") || id.includes("ocean-plastic")) {
-    return "recycled-ocean-plastic-shoes";
+  if (trimmedId.includes("shirt") || trimmedId.includes("cotton") || trimmedId.includes("tshirt") || trimmedId.includes("t-shirt")) {
+    console.log("Matched as organic cotton shirt");
+    return "organic-cotton-shirt";
   }
-  
-  // Check for product type in the ID
-  if (id.includes("bottle") || (id.includes("bamboo") && !id.includes("toothbrush"))) {
-    return "1";
+  if (trimmedId.includes("cream") || trimmedId.includes("face")) {
+    console.log("Matched as natural face cream");
+    return "natural-face-cream";
   }
-  if (id.includes("shirt") || id.includes("cotton") || id.includes("tshirt")) {
-    return "2";
+  if (trimmedId.includes("coffee") || trimmedId.includes("cup")) {
+    console.log("Matched as recycled coffee cup");
+    return "recycled-coffee-cup";
   }
-  if (id.includes("cream") || id.includes("face")) {
-    return "3";
-  }
-  if (id.includes("coffee") || id.includes("cup")) {
-    return "4";
-  }
-  if (id.includes("power") || id.includes("solar") || id.includes("bank")) {
+  if (trimmedId.includes("power") || trimmedId.includes("solar") || trimmedId.includes("bank") || trimmedId.includes("charger")) {
+    console.log("Matched as solar power bank");
     return "solar-power-bank-001";
   }
-  if (id.includes("perfume") || id.includes("fragrance") || id.includes("cologne")) {
+  if (trimmedId.includes("shoes") || trimmedId.includes("footwear") || trimmedId.includes("ocean-plastic")) {
+    console.log("Matched as ocean plastic shoes");
+    return "recycled-ocean-plastic-shoes";
+  }
+  if (trimmedId.includes("dress") || trimmedId.includes("fashion") || trimmedId.includes("glam") || trimmedId.includes("party")) {
+    console.log("Matched as fast fashion dress");
+    return "fast-fashion-dress-001";
+  }
+  if (trimmedId.includes("camera") || trimmedId.includes("snap") || trimmedId.includes("disposable")) {
+    console.log("Matched as disposable camera");
+    return "disposable-camera-001";
+  }
+  if (trimmedId.includes("glass") || trimmedId.includes("sunglass") || trimmedId.includes("trend") || trimmedId.includes("eye")) {
+    console.log("Matched as plastic glasses");
+    return "plastic-glasses-001";
+  }
+  if (trimmedId.includes("perfume") || trimmedId.includes("fragrance") || trimmedId.includes("cologne")) {
+    console.log("Matched as perfume");
     return "perfume";
   }
   
-  // Check for numeric pattern in ID
+  // Check for numeric pattern in ID as last resort
   for (const num of ["1", "2", "3", "4", "5"]) {
-    if (id.includes(num)) {
+    if (trimmedId.includes(num)) {
+      console.log(`Matched using numeric identifier: ${num}`);
       return num;
     }
   }
   
-  // Default to perfume if no match is found
-  return "perfume";
+  // Default fallback
+  console.log("No match found, defaulting to bamboo water bottle");
+  return "1";
 };
 
 export const determineProductName = (
@@ -419,87 +463,111 @@ export const determineProductName = (
     return "Plastic Product";
   }
   
-  // Check for direct match in product descriptions
-  if (productDescriptions[productType]) {
-    return productDescriptions[productType];
+  const normalizedType = productType.trim().toLowerCase();
+  
+  // Check for direct match in product descriptions first
+  if (productDescriptions[normalizedType]) {
+    return productDescriptions[normalizedType];
   }
   
-  // Check for specific products first
-  if (productId.includes("dress") || productId.includes("fashion") || productId.includes("glam") || productId.includes("party")) {
-    return "FastGlam Party Dress";
-  }
-  if (productId.includes("camera") || productId.includes("snap") || productId.includes("disposable")) {
-    return "SnapQuick Disposable Camera Kit";
-  }
-  if (productId.includes("glass") || productId.includes("sunglass") || productId.includes("trend") || productId.includes("eye")) {
-    return "TrendEye Colorful Sunglasses Set";
-  }
-  if (productId.includes("toothbrush") || (productId.includes("bamboo") && productId.includes("brush"))) {
-    return "Biodegradable Bamboo Toothbrush";
-  }
-  if (productId.includes("ocean") || productId.includes("shoes") || productId.includes("footwear")) {
-    return "Recycled Ocean Plastic Shoes";
-  }
+  // Fallback to keyword matching in product ID 
+  const normalizedId = productId.trim().toLowerCase();
   
-  // Check for product type in the ID
-  if (productId.includes("bottle") || (productId.includes("bamboo") && !productId.includes("brush"))) {
+  if (normalizedId.includes("bottle") || (normalizedId.includes("bamboo") && !normalizedId.includes("brush") && !normalizedId.includes("tooth"))) {
     return "Bamboo Water Bottle";
   }
-  if (productId.includes("shirt") || productId.includes("cotton")) {
+  if (normalizedId.includes("toothbrush") || (normalizedId.includes("bamboo") && (normalizedId.includes("brush") || normalizedId.includes("tooth")))) {
+    return "Biodegradable Bamboo Toothbrush";
+  }
+  if (normalizedId.includes("shirt") || normalizedId.includes("cotton") || normalizedId.includes("tshirt") || normalizedId.includes("t-shirt")) {
     return "Organic Cotton T-shirt";
   }
-  if (productId.includes("cream") || productId.includes("face")) {
+  if (normalizedId.includes("cream") || normalizedId.includes("face")) {
     return "Natural Face Cream";
   }
-  if (productId.includes("coffee") || productId.includes("cup")) {
+  if (normalizedId.includes("coffee") || normalizedId.includes("cup")) {
     return "Recycled Coffee Cup";
   }
-  if (productId.includes("power") || productId.includes("solar")) {
+  if (normalizedId.includes("power") || normalizedId.includes("solar") || normalizedId.includes("bank") || normalizedId.includes("charger")) {
     return "EcoCharge Solar Power Bank";
   }
-  if (productId.includes("perfume") || productId.includes("fragrance")) {
+  if (normalizedId.includes("shoes") || normalizedId.includes("footwear") || normalizedId.includes("ocean-plastic")) {
+    return "Recycled Ocean Plastic Shoes";
+  }
+  if (normalizedId.includes("dress") || normalizedId.includes("fashion") || normalizedId.includes("glam") || normalizedId.includes("party")) {
+    return "FastGlam Party Dress";
+  }
+  if (normalizedId.includes("camera") || normalizedId.includes("snap") || normalizedId.includes("disposable")) {
+    return "SnapQuick Disposable Camera Kit";
+  }
+  if (normalizedId.includes("glass") || normalizedId.includes("sunglass") || normalizedId.includes("trend") || normalizedId.includes("eye")) {
+    return "TrendEye Colorful Sunglasses Set";
+  }
+  if (normalizedId.includes("perfume") || normalizedId.includes("fragrance") || normalizedId.includes("cologne")) {
     return "Fragrance";
   }
-  if (productId.includes("plastic")) {
-    return "Plastic Product";
-  }
   
-  // Default case
+  // Last resort fallback
   return "Unknown Product";
 };
 
 // Add a utility function to get product images - this will help with the missing solar power bank image
 export const getProductImage = (productType: string): string => {
-  switch(productType) {
+  const normalizedType = productType.trim().toLowerCase();
+  
+  switch(normalizedType) {
     case "1":
     case "bamboo-water-bottle":
+    case "bottle":
+    case "water-bottle":
       return "https://images.unsplash.com/photo-1605952224352-e3db8d193cf7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
     case "2":
     case "organic-cotton-shirt":
+    case "shirt":
+    case "t-shirt":
+    case "cotton-shirt":
       return "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
     case "3":
     case "natural-face-cream":
+    case "face-cream":
+    case "cream":
       return "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
     case "4":
     case "recycled-coffee-cup":
+    case "coffee-cup":
+    case "cup":
       return "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
     case "5":
     case "solar-power-bank":
     case "solar-power-bank-001":
+    case "power-bank":
+    case "powerbank":
       return "https://images.unsplash.com/photo-1594131975464-8a26d4ad3f7f?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     case "perfume":
+    case "fragrance":
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
     case "fast-fashion-dress-001":
+    case "dress":
+    case "fashion-dress":
       return "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80";
     case "disposable-camera-001":
+    case "camera":
+    case "disposable-camera":
       return "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80";
     case "plastic-glasses-001":
+    case "glasses":
+    case "sunglasses":
       return "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80";
     case "biodegradable-bamboo-toothbrush":
+    case "toothbrush":
+    case "bamboo-toothbrush":
       return "https://images.unsplash.com/photo-1559674398-1e2f98a8f8f3?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     case "recycled-ocean-plastic-shoes":
+    case "shoes":
+    case "footwear":
       return "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     default:
+      console.log(`No image match found for ${normalizedType}, using default image`);
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
   }
 };

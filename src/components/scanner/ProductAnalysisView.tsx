@@ -11,6 +11,7 @@ import AnalysisWarnings from "./analysis/AnalysisWarnings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { determineProductKey } from "./utils/product-utils";
 
 interface ProductAnalysisViewProps {
   productId: string;
@@ -20,6 +21,12 @@ interface ProductAnalysisViewProps {
 const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) => {
   const { toast } = useToast();
   
+  // Normalize productId to help with accurate product identification
+  const normalizedProductId = (productId || "").toLowerCase().trim();
+  const productKey = determineProductKey(normalizedProductId);
+  
+  console.log("ProductAnalysisView: Using product key:", productKey, "for ID:", normalizedProductId);
+  
   const {
     materials,
     certifications,
@@ -28,7 +35,7 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     productName,
     productType,
     refetch
-  } = useProductAnalysis(productId);
+  } = useProductAnalysis(productKey);
 
   // Automatically refetch data when productId changes
   useEffect(() => {
@@ -133,6 +140,11 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
       warnings.push("Contains batteries which require special disposal to prevent chemical leaching");
     } else if (productType === 'plastic-glasses-001') {
       warnings.push("Acrylic plastics are derived from non-renewable petroleum resources");
+    } else if (productType === 'solar-power-bank-001' || productType === '5') {
+      warnings.push("Contains lithium-ion battery that requires special disposal");
+      warnings.push("Electronic components can contain rare metals with environmental mining impacts");
+    } else if (productType === 'recycled-ocean-plastic-shoes') {
+      warnings.push("Contains some synthetic components that will not biodegrade");
     } else if (productType.includes('plastic') || detectedMaterials.some(m => m.toLowerCase().includes('plastic'))) {
       warnings.push("Contains plastic which is non-biodegradable and contributes to pollution");
     }
@@ -156,6 +168,11 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
       recommendations.push("If analog is preferred, consider a reusable film camera instead");
     } else if (productType === 'plastic-glasses-001') {
       recommendations.push("Consider sunglasses made from sustainable materials like wood or recycled materials");
+    } else if (productType === 'solar-power-bank-001' || productType === '5') {
+      recommendations.push("Look for devices with replaceable batteries to extend life");
+      recommendations.push("Consider solar chargers without integrated batteries");
+    } else if (productType === 'recycled-ocean-plastic-shoes') {
+      recommendations.push("Look for shoes with biodegradable soles and natural fiber uppers");
     } else if (productType.includes('plastic')) {
       recommendations.push("Look for products made from biodegradable or recycled alternatives");
     } else {

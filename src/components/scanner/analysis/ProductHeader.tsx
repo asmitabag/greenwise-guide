@@ -30,7 +30,7 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
       .join(' ');
   };
   
-  // Get product-specific materials if detected materials aren't provided
+  // Determine product specific materials
   const getProductSpecificMaterials = (): string[] => {
     if (detectedMaterials && detectedMaterials.length > 0) {
       return detectedMaterials;
@@ -40,32 +40,54 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
     if (productType) {
       switch (productType) {
         case "recycled-ocean-plastic-shoes":
+        case "shoes":
+        case "footwear":
           return ["Recycled Ocean Plastic", "Natural Rubber", "Organic Cotton"];
         case "biodegradable-bamboo-toothbrush":
+        case "toothbrush":
+        case "bamboo-toothbrush":
           return ["Bamboo", "Plant-Based Bristles", "Compostable Packaging"];
         case "solar-power-bank-001":
         case "solar-power-bank":
         case "5":
+        case "powerbank":
+        case "power-bank":
           return ["Recycled Aluminum", "Silicon Solar Panels", "Lithium-ion Battery"];
         case "recycled-coffee-cup":
         case "4":
+        case "coffee-cup":
+        case "cup":
           return ["Recycled Paper", "Plant-based Lining", "Vegetable Inks"];
         case "natural-face-cream":
         case "3":
+        case "face-cream":
+        case "cream":
           return ["Aloe Vera Extract", "Shea Butter", "Coconut Oil", "Natural Preservatives"];
         case "organic-cotton-shirt":
         case "2":
+        case "cotton-shirt":
+        case "shirt":
+        case "t-shirt":
           return ["Organic Cotton", "Natural Dyes", "Elastane"];
         case "bamboo-water-bottle":
         case "1":
+        case "water-bottle":
+        case "bottle":
           return ["Bamboo", "Stainless Steel", "Silicone"];
         case "fast-fashion-dress-001":
+        case "dress":
+        case "fashion-dress":
           return ["Polyester", "Plastic Sequins", "Synthetic Fiber"];
         case "disposable-camera-001":
+        case "camera":
+        case "disposable-camera":
           return ["Plastic Housing", "Electronic Components", "Batteries"];
         case "plastic-glasses-001":
+        case "glasses":
+        case "sunglasses":
           return ["Acrylic Plastic", "Metal Hinges", "Synthetic Dyes"];
         case "perfume":
+        case "fragrance":
           return ["Alcohol (Denatured)", "Perfume Compounds", "Linalool", "Citral"];
         default:
           return [];
@@ -79,15 +101,15 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
         return ["Bamboo", "Plant-Based Bristles", "Compostable Packaging"];
       } else if (lowerName.includes("shoes") || lowerName.includes("footwear")) {
         return ["Recycled Ocean Plastic", "Natural Rubber", "Organic Cotton"];
-      } else if (lowerName.includes("power") || lowerName.includes("solar")) {
+      } else if (lowerName.includes("power") || lowerName.includes("solar") || lowerName.includes("bank")) {
         return ["Recycled Aluminum", "Silicon Solar Panels", "Lithium-ion Battery"];
       } else if (lowerName.includes("coffee") || lowerName.includes("cup")) {
         return ["Recycled Paper", "Plant-based Lining", "Vegetable Inks"];
       } else if (lowerName.includes("face") || lowerName.includes("cream")) {
         return ["Aloe Vera Extract", "Shea Butter", "Coconut Oil", "Natural Preservatives"];
-      } else if (lowerName.includes("cotton") || lowerName.includes("shirt")) {
+      } else if (lowerName.includes("cotton") || lowerName.includes("shirt") || lowerName.includes("t-shirt")) {
         return ["Organic Cotton", "Natural Dyes", "Elastane"];
-      } else if (lowerName.includes("bottle") || lowerName.includes("bamboo")) {
+      } else if (lowerName.includes("bottle") || (lowerName.includes("bamboo") && !lowerName.includes("brush"))) {
         return ["Bamboo", "Stainless Steel", "Silicone"];
       } else if (lowerName.includes("dress") || lowerName.includes("fashion")) {
         return ["Polyester", "Plastic Sequins", "Synthetic Fiber"];
@@ -136,34 +158,37 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
   
   // Choose product image based on product name if not provided by type
   const getImageFromName = () => {
-    if (productName.includes("Disposable Camera") || productName.includes("SnapQuick")) {
+    if (productName.toLowerCase().includes("camera") || productName.includes("SnapQuick")) {
       return "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80";
     }
-    if (productName.includes("FastGlam") || productName.includes("Party Dress")) {
+    if (productName.toLowerCase().includes("dress") || productName.includes("FastGlam") || productName.includes("Party Dress")) {
       return "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80";
     }
-    if (productName.includes("Sunglasses") || productName.includes("TrendEye")) {
+    if (productName.toLowerCase().includes("sunglass") || productName.includes("TrendEye")) {
       return "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80";
     }
-    if (productName.includes("Solar") || productName.includes("Power Bank")) {
+    if (productName.toLowerCase().includes("solar") || productName.toLowerCase().includes("power") || productName.toLowerCase().includes("bank")) {
       return "https://images.unsplash.com/photo-1594131975464-8a26d4ad3f7f?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
-    if (productName.includes("Face Cream") || productName.includes("Natural Face")) {
+    if (productName.toLowerCase().includes("face") || productName.toLowerCase().includes("cream") || productName.includes("Natural Face")) {
       return "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
-    if (productName.includes("Cotton") || productName.includes("T-shirt")) {
+    if (productName.toLowerCase().includes("cotton") || productName.toLowerCase().includes("shirt") || productName.toLowerCase().includes("t-shirt")) {
       return "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
-    if (productName.includes("Perfume") || productName.includes("Fragrance")) {
+    if (productName.toLowerCase().includes("perfume") || productName.toLowerCase().includes("fragrance")) {
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
-    if (productName.includes("Bamboo") || productName.includes("Toothbrush")) {
+    if (productName.toLowerCase().includes("toothbrush")) {
       return "https://images.unsplash.com/photo-1559674398-1e2f98a8f8f3?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
-    if (productName.includes("Shoes") || productName.includes("Footwear")) {
+    if (productName.toLowerCase().includes("bamboo") && !productName.toLowerCase().includes("toothbrush")) {
+      return "https://images.unsplash.com/photo-1605952224352-e3db8d193cf7?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    if (productName.toLowerCase().includes("shoes") || productName.toLowerCase().includes("footwear")) {
       return "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
-    if (productName.includes("Coffee") || productName.includes("Cup")) {
+    if (productName.toLowerCase().includes("coffee") || productName.toLowerCase().includes("cup")) {
       return "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
     return null;
