@@ -38,6 +38,17 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     }
   }, [productId, refetch]);
 
+  // Get the detected materials from session storage
+  const getDetectedMaterials = () => {
+    try {
+      const storedMaterials = sessionStorage.getItem('detectedMaterials');
+      return storedMaterials ? JSON.parse(storedMaterials) : [];
+    } catch (error) {
+      console.error("Error retrieving detected materials from session storage:", error);
+      return [];
+    }
+  };
+
   if (materialsLoading) {
     return (
       <Card className="p-6">
@@ -100,23 +111,63 @@ const ProductAnalysisView = ({ productId, onBack }: ProductAnalysisViewProps) =>
     return acc + (material.eco_score * (material.percentage / 100));
   }, 0);
 
-  const detectedMaterials = sessionStorage.getItem('detectedMaterials') 
-    ? JSON.parse(sessionStorage.getItem('detectedMaterials')!) 
-    : [];
+  const detectedMaterials = getDetectedMaterials();
 
-  const warnings = materials
-    .filter(m => m.eco_score < 4)
-    .map(m => `Contains non-sustainable ${m.name.toLowerCase()} which may have environmental impact`);
+  // Generate warnings based on materials
+  const generateWarnings = () => {
+    const warnings: string[] = [];
+    
+    // Add warnings for low eco-score materials
+    materials
+      .filter(m => m.eco_score < 4)
+      .forEach(m => {
+        warnings.push(`Contains non-sustainable ${m.name.toLowerCase()} which may have environmental impact`);
+      });
+    
+    // Add specific warnings based on product type
+    if (productType === 'fast-fashion-dress-001') {
+      warnings.push("Fast fashion products have a high environmental impact and short lifespan");
+      warnings.push("Synthetic fabrics shed microplastics during washing that pollute waterways");
+    } else if (productType === 'disposable-camera-001') {
+      warnings.push("Single-use electronics contribute significantly to e-waste");
+      warnings.push("Contains batteries which require special disposal to prevent chemical leaching");
+    } else if (productType === 'plastic-glasses-001') {
+      warnings.push("Acrylic plastics are derived from non-renewable petroleum resources");
+    } else if (productType.includes('plastic') || detectedMaterials.some(m => m.toLowerCase().includes('plastic'))) {
+      warnings.push("Contains plastic which is non-biodegradable and contributes to pollution");
+    }
+    
+    return warnings;
+  };
 
-  if (detectedMaterials.some((m: string) => m.toLowerCase().includes('plastic'))) {
-    warnings.push("Contains plastic which is non-biodegradable and contributes to pollution");
-  }
+  // Generate appropriate recommendations based on the product
+  const generateRecommendations = () => {
+    const recommendations: string[] = [];
+    
+    // Generic recommendations for all products
+    recommendations.push("Consider products with higher percentage of sustainable materials");
+    
+    // Product-specific recommendations
+    if (productType === 'fast-fashion-dress-001') {
+      recommendations.push("Look for clothing made from natural or recycled fibers");
+      recommendations.push("Invest in durable pieces with timeless designs rather than trendy items");
+    } else if (productType === 'disposable-camera-001') {
+      recommendations.push("Use digital cameras or smartphones instead of disposable cameras");
+      recommendations.push("If analog is preferred, consider a reusable film camera instead");
+    } else if (productType === 'plastic-glasses-001') {
+      recommendations.push("Consider sunglasses made from sustainable materials like wood or recycled materials");
+    } else if (productType.includes('plastic')) {
+      recommendations.push("Look for products made from biodegradable or recycled alternatives");
+    } else {
+      recommendations.push("Check for eco-certifications when purchasing similar products");
+      recommendations.push("Research brands committed to sustainability and ethical production");
+    }
+    
+    return recommendations;
+  };
 
-  const recommendations = [
-    "Consider products with higher percentage of sustainable materials",
-    "Look for recycled or biodegradable alternatives",
-    "Check for eco-certifications when purchasing similar products"
-  ];
+  const warnings = generateWarnings();
+  const recommendations = generateRecommendations();
 
   const metrics = {
     biodegradable_percentage: Math.floor(overallEcoScore * 10),

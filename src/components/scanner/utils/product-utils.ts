@@ -538,6 +538,90 @@ export const productMaterialMappings = {
       certification_ids: []
     }
   ],
+  // Biodegradable Bamboo Toothbrush
+  "biodegradable-bamboo-toothbrush": [
+    { 
+      id: "bbt-1",
+      name: "Bamboo", 
+      percentage: 85, 
+      eco_score: 9.0, 
+      sustainable: true, 
+      details: "Renewable resource that grows quickly without pesticides",
+      carbon_footprint: 0.4,
+      water_usage: 25,
+      recyclability_rating: 6,
+      biodegradability_rating: 9,
+      certification_ids: ["cert-1", "cert-3"]
+    },
+    { 
+      id: "bbt-2",
+      name: "Plant-Based Bristles", 
+      percentage: 10, 
+      eco_score: 7.5, 
+      sustainable: true, 
+      details: "Made from castor bean oil instead of petroleum-based nylon",
+      carbon_footprint: 1.2,
+      water_usage: 45,
+      recyclability_rating: 6,
+      biodegradability_rating: 8,
+      certification_ids: ["cert-3", "cert-4"]
+    },
+    { 
+      id: "bbt-3",
+      name: "Compostable Packaging", 
+      percentage: 5, 
+      eco_score: 8.5, 
+      sustainable: true, 
+      details: "Made from recycled and biodegradable kraft paper",
+      carbon_footprint: 0.6,
+      water_usage: 15,
+      recyclability_rating: 9,
+      biodegradability_rating: 10,
+      certification_ids: ["cert-1", "cert-2", "cert-3"]
+    }
+  ],
+  // Recycled Ocean Plastic Shoes
+  "recycled-ocean-plastic-shoes": [
+    { 
+      id: "rops-1",
+      name: "Recycled Ocean Plastic", 
+      percentage: 65, 
+      eco_score: 8.0, 
+      sustainable: true, 
+      details: "Plastic waste collected from oceans and coastlines",
+      carbon_footprint: 1.8,
+      water_usage: 40,
+      recyclability_rating: 7,
+      biodegradability_rating: 2,
+      certification_ids: ["cert-1", "cert-2"]
+    },
+    { 
+      id: "rops-2",
+      name: "Natural Rubber", 
+      percentage: 25, 
+      eco_score: 7.0, 
+      sustainable: true, 
+      details: "Responsibly sourced sole material with good durability",
+      carbon_footprint: 2.2,
+      water_usage: 55,
+      recyclability_rating: 5,
+      biodegradability_rating: 7,
+      certification_ids: ["cert-3"]
+    },
+    { 
+      id: "rops-3",
+      name: "Organic Cotton", 
+      percentage: 10, 
+      eco_score: 8.5, 
+      sustainable: true, 
+      details: "Used for laces and inner lining",
+      carbon_footprint: 1.1,
+      water_usage: 70,
+      recyclability_rating: 8,
+      biodegradability_rating: 9,
+      certification_ids: ["cert-4"]
+    }
+  ],
   // Generic plastic product for anything plastic-based
   "plastic": [ 
     { 
@@ -572,12 +656,16 @@ export const productDescriptions = {
   "fast-fashion-dress-001": "FastGlam Party Dress",
   "disposable-camera-001": "SnapQuick Disposable Camera Kit",
   "plastic-glasses-001": "TrendEye Colorful Sunglasses Set",
-  "solar-power-bank-001": "EcoCharge Solar Power Bank"
+  "solar-power-bank-001": "EcoCharge Solar Power Bank",
+  "biodegradable-bamboo-toothbrush": "Biodegradable Bamboo Toothbrush",
+  "recycled-ocean-plastic-shoes": "Recycled Ocean Plastic Shoes"
 };
 
 export const determineProductKey = (id: string): string => {
   // Direct matches
-  if (["1", "2", "3", "4", "5", "perfume", "fast-fashion-dress-001", "disposable-camera-001", "plastic-glasses-001", "solar-power-bank-001"].includes(id)) {
+  if (["1", "2", "3", "4", "5", "perfume", "fast-fashion-dress-001", "disposable-camera-001", 
+       "plastic-glasses-001", "solar-power-bank-001", "biodegradable-bamboo-toothbrush", 
+       "recycled-ocean-plastic-shoes"].includes(id)) {
     return id;
   }
   
@@ -596,8 +684,18 @@ export const determineProductKey = (id: string): string => {
     return "plastic-glasses-001";
   }
   
+  // Check for toothbrush
+  if (id.includes("toothbrush") || id.includes("bamboo-tooth")) {
+    return "biodegradable-bamboo-toothbrush";
+  }
+  
+  // Check for shoes
+  if (id.includes("shoes") || id.includes("footwear") || id.includes("ocean-plastic")) {
+    return "recycled-ocean-plastic-shoes";
+  }
+  
   // Check for product type in the ID
-  if (id.includes("bottle") || id.includes("bamboo")) {
+  if (id.includes("bottle") || (id.includes("bamboo") && !id.includes("toothbrush"))) {
     return "1";
   }
   if (id.includes("shirt") || id.includes("cotton") || id.includes("tshirt")) {
@@ -651,15 +749,35 @@ export const determineProductName = (
   if (productId.includes("glass") || productId.includes("sunglass") || productId.includes("trend") || productId.includes("eye")) {
     return "TrendEye Colorful Sunglasses Set";
   }
+  if (productId.includes("toothbrush") || (productId.includes("bamboo") && productId.includes("brush"))) {
+    return "Biodegradable Bamboo Toothbrush";
+  }
+  if (productId.includes("ocean") || productId.includes("shoes") || productId.includes("footwear")) {
+    return "Recycled Ocean Plastic Shoes";
+  }
   
   // Check for product type in the ID
-  if (productId.includes("bottle") || productId.includes("bamboo")) return "Bamboo Water Bottle";
-  if (productId.includes("shirt") || productId.includes("cotton")) return "Organic Cotton T-shirt";
-  if (productId.includes("cream") || productId.includes("face")) return "Natural Face Cream";
-  if (productId.includes("coffee") || productId.includes("cup")) return "Recycled Coffee Cup";
-  if (productId.includes("power") || productId.includes("solar")) return "EcoCharge Solar Power Bank";
-  if (productId.includes("perfume") || productId.includes("fragrance")) return "Fragrance";
-  if (productId.includes("plastic")) return "Plastic Product";
+  if (productId.includes("bottle") || (productId.includes("bamboo") && !productId.includes("brush"))) {
+    return "Bamboo Water Bottle";
+  }
+  if (productId.includes("shirt") || productId.includes("cotton")) {
+    return "Organic Cotton T-shirt";
+  }
+  if (productId.includes("cream") || productId.includes("face")) {
+    return "Natural Face Cream";
+  }
+  if (productId.includes("coffee") || productId.includes("cup")) {
+    return "Recycled Coffee Cup";
+  }
+  if (productId.includes("power") || productId.includes("solar")) {
+    return "EcoCharge Solar Power Bank";
+  }
+  if (productId.includes("perfume") || productId.includes("fragrance")) {
+    return "Fragrance";
+  }
+  if (productId.includes("plastic")) {
+    return "Plastic Product";
+  }
   
   // Default case
   return "Unknown Product";
@@ -692,6 +810,10 @@ export const getProductImage = (productType: string): string => {
       return "https://images.unsplash.com/photo-1554136545-2f288e75dfe6?auto=format&fit=crop&w=800&q=80";
     case "plastic-glasses-001":
       return "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80";
+    case "biodegradable-bamboo-toothbrush":
+      return "https://images.unsplash.com/photo-1559674398-1e2f98a8f8f3?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    case "recycled-ocean-plastic-shoes":
+      return "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     default:
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
   }

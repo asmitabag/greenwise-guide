@@ -30,14 +30,91 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
       .join(' ');
   };
   
+  // Get product-specific materials if detected materials aren't provided
+  const getProductSpecificMaterials = (): string[] => {
+    if (detectedMaterials && detectedMaterials.length > 0) {
+      return detectedMaterials;
+    }
+    
+    // Default materials based on product type if no detected materials
+    if (productType) {
+      switch (productType) {
+        case "recycled-ocean-plastic-shoes":
+          return ["Recycled Ocean Plastic", "Natural Rubber", "Organic Cotton"];
+        case "biodegradable-bamboo-toothbrush":
+          return ["Bamboo", "Plant-Based Bristles", "Compostable Packaging"];
+        case "solar-power-bank-001":
+        case "solar-power-bank":
+        case "5":
+          return ["Recycled Aluminum", "Silicon Solar Panels", "Lithium-ion Battery"];
+        case "recycled-coffee-cup":
+        case "4":
+          return ["Recycled Paper", "Plant-based Lining", "Vegetable Inks"];
+        case "natural-face-cream":
+        case "3":
+          return ["Aloe Vera Extract", "Shea Butter", "Coconut Oil", "Natural Preservatives"];
+        case "organic-cotton-shirt":
+        case "2":
+          return ["Organic Cotton", "Natural Dyes", "Elastane"];
+        case "bamboo-water-bottle":
+        case "1":
+          return ["Bamboo", "Stainless Steel", "Silicone"];
+        case "fast-fashion-dress-001":
+          return ["Polyester", "Plastic Sequins", "Synthetic Fiber"];
+        case "disposable-camera-001":
+          return ["Plastic Housing", "Electronic Components", "Batteries"];
+        case "plastic-glasses-001":
+          return ["Acrylic Plastic", "Metal Hinges", "Synthetic Dyes"];
+        case "perfume":
+          return ["Alcohol (Denatured)", "Perfume Compounds", "Linalool", "Citral"];
+        default:
+          return [];
+      }
+    }
+    
+    // Materials based on product name
+    if (productName) {
+      const lowerName = productName.toLowerCase();
+      if (lowerName.includes("toothbrush")) {
+        return ["Bamboo", "Plant-Based Bristles", "Compostable Packaging"];
+      } else if (lowerName.includes("shoes") || lowerName.includes("footwear")) {
+        return ["Recycled Ocean Plastic", "Natural Rubber", "Organic Cotton"];
+      } else if (lowerName.includes("power") || lowerName.includes("solar")) {
+        return ["Recycled Aluminum", "Silicon Solar Panels", "Lithium-ion Battery"];
+      } else if (lowerName.includes("coffee") || lowerName.includes("cup")) {
+        return ["Recycled Paper", "Plant-based Lining", "Vegetable Inks"];
+      } else if (lowerName.includes("face") || lowerName.includes("cream")) {
+        return ["Aloe Vera Extract", "Shea Butter", "Coconut Oil", "Natural Preservatives"];
+      } else if (lowerName.includes("cotton") || lowerName.includes("shirt")) {
+        return ["Organic Cotton", "Natural Dyes", "Elastane"];
+      } else if (lowerName.includes("bottle") || lowerName.includes("bamboo")) {
+        return ["Bamboo", "Stainless Steel", "Silicone"];
+      } else if (lowerName.includes("dress") || lowerName.includes("fashion")) {
+        return ["Polyester", "Plastic Sequins", "Synthetic Fiber"];
+      } else if (lowerName.includes("camera") || lowerName.includes("disposable")) {
+        return ["Plastic Housing", "Electronic Components", "Batteries"];
+      } else if (lowerName.includes("glass") || lowerName.includes("sunglass")) {
+        return ["Acrylic Plastic", "Metal Hinges", "Synthetic Dyes"];
+      } else if (lowerName.includes("perfume") || lowerName.includes("fragrance")) {
+        return ["Alcohol (Denatured)", "Perfume Compounds", "Linalool", "Citral"];
+      }
+    }
+    
+    return [];
+  };
+  
   // Filter out duplicate and similar materials for cleaner display
   const getFilteredMaterials = () => {
-    if (!detectedMaterials || detectedMaterials.length === 0) return [];
+    const materialsList = detectedMaterials && detectedMaterials.length > 0 
+      ? detectedMaterials 
+      : getProductSpecificMaterials();
+    
+    if (!materialsList || materialsList.length === 0) return [];
     
     const uniqueMaterials = new Set<string>();
     const filteredList: string[] = [];
     
-    detectedMaterials.forEach(material => {
+    materialsList.forEach(material => {
       // Normalize the material name to avoid similar duplicates
       const normalizedName = material.toLowerCase().trim();
       
@@ -79,6 +156,15 @@ const ProductHeader = ({ productName, ecoScore, productType, detectedMaterials }
     }
     if (productName.includes("Perfume") || productName.includes("Fragrance")) {
       return "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    if (productName.includes("Bamboo") || productName.includes("Toothbrush")) {
+      return "https://images.unsplash.com/photo-1559674398-1e2f98a8f8f3?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    if (productName.includes("Shoes") || productName.includes("Footwear")) {
+      return "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
+    }
+    if (productName.includes("Coffee") || productName.includes("Cup")) {
+      return "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&q=60&w=600&ixlib=rb-4.0.3";
     }
     return null;
   };

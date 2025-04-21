@@ -42,6 +42,14 @@ export const analyzeImage = async (
         return 'natural-face-cream';
       } else if (lowerName.includes('cotton') || lowerName.includes('shirt')) {
         return 'organic-cotton-shirt';
+      } else if (lowerName.includes('toothbrush') || lowerName.includes('bamboo-brush')) {
+        return 'biodegradable-bamboo-toothbrush';
+      } else if (lowerName.includes('shoes') || lowerName.includes('ocean') || lowerName.includes('plastic-shoes')) {
+        return 'recycled-ocean-plastic-shoes';
+      } else if (lowerName.includes('bottle') || lowerName.includes('bamboo-bottle')) {
+        return 'bamboo-water-bottle';
+      } else if (lowerName.includes('coffee') || lowerName.includes('cup')) {
+        return 'recycled-coffee-cup';
       }
       
       return null;
@@ -69,6 +77,7 @@ export const analyzeImage = async (
     if (data && data.success) {
       // Extract materials from response
       let detectedMaterials: string[] = [];
+      let inferredProductType: string | null = null;
       
       if (data.materials) {
         // If the API returns detected materials directly
@@ -94,7 +103,8 @@ export const analyzeImage = async (
         const materialKeywords = [
           'cotton', 'polyester', 'nylon', 'wool', 'silk', 'leather',
           'plastic', 'glass', 'metal', 'paper', 'wood', 'bamboo',
-          'alcohol', 'fragrance', 'perfume'
+          'alcohol', 'fragrance', 'perfume', 'recycled', 'ocean',
+          'biodegradable', 'toothbrush', 'solar', 'rubber', 'lithium'
         ];
         
         materialKeywords.forEach(keyword => {
@@ -102,12 +112,70 @@ export const analyzeImage = async (
             detectedMaterials.push(keyword);
           }
         });
+        
+        // Try to infer product type from text
+        const productKeywords = {
+          'toothbrush': 'biodegradable-bamboo-toothbrush',
+          'bamboo toothbrush': 'biodegradable-bamboo-toothbrush',
+          'ocean plastic': 'recycled-ocean-plastic-shoes',
+          'recycled shoes': 'recycled-ocean-plastic-shoes',
+          'solar power': 'solar-power-bank-001',
+          'power bank': 'solar-power-bank-001',
+          'face cream': 'natural-face-cream',
+          'cotton shirt': 'organic-cotton-shirt',
+          't-shirt': 'organic-cotton-shirt',
+          'bamboo bottle': 'bamboo-water-bottle',
+          'water bottle': 'bamboo-water-bottle',
+          'coffee cup': 'recycled-coffee-cup',
+          'party dress': 'fast-fashion-dress-001',
+          'fashion dress': 'fast-fashion-dress-001',
+          'camera': 'disposable-camera-001',
+          'disposable camera': 'disposable-camera-001',
+          'sunglasses': 'plastic-glasses-001',
+          'glasses': 'plastic-glasses-001',
+          'perfume': 'perfume',
+          'fragrance': 'perfume'
+        };
+        
+        for (const [keyword, type] of Object.entries(productKeywords)) {
+          if (text.toLowerCase().includes(keyword)) {
+            inferredProductType = type;
+            break;
+          }
+        }
       }
       
       // Remove duplicates
       detectedMaterials = [...new Set(detectedMaterials)];
-      
       console.log("Detected materials:", detectedMaterials);
+      
+      // Use detected materials to infer product type if not already determined
+      if (!inferredProductType) {
+        // Infer product type from detected materials
+        if (detectedMaterials.some(m => m.toLowerCase().includes('toothbrush') || (m.toLowerCase().includes('bamboo') && m.toLowerCase().includes('brush')))) {
+          inferredProductType = 'biodegradable-bamboo-toothbrush';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('ocean') && m.toLowerCase().includes('plastic'))) {
+          inferredProductType = 'recycled-ocean-plastic-shoes';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('solar') || m.toLowerCase().includes('power bank'))) {
+          inferredProductType = 'solar-power-bank-001';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('coffee') || m.toLowerCase().includes('cup'))) {
+          inferredProductType = 'recycled-coffee-cup';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('face') || m.toLowerCase().includes('cream'))) {
+          inferredProductType = 'natural-face-cream';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('cotton') || m.toLowerCase().includes('shirt'))) {
+          inferredProductType = 'organic-cotton-shirt';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('bamboo') && m.toLowerCase().includes('bottle'))) {
+          inferredProductType = 'bamboo-water-bottle';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('dress') || m.toLowerCase().includes('fashion'))) {
+          inferredProductType = 'fast-fashion-dress-001';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('camera') || m.toLowerCase().includes('disposable'))) {
+          inferredProductType = 'disposable-camera-001';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('glass') || m.toLowerCase().includes('sunglass'))) {
+          inferredProductType = 'plastic-glasses-001';
+        } else if (detectedMaterials.some(m => m.toLowerCase().includes('perfume') || m.toLowerCase().includes('fragrance'))) {
+          inferredProductType = 'perfume';
+        }
+      }
       
       // Get eco score from the response or calculate based on materials
       const ecoScore = data.eco_score || 
@@ -118,7 +186,10 @@ export const analyzeImage = async (
                       ) ? 3.5 : 7.5);
       
       // Get product type from response or determine from materials
-      const actualProductId = data.actualProductId || productId;
+      const actualProductId = inferredProductType || data.actualProductId || productId;
+      
+      // Store materials in sessionStorage so they can be used by other components
+      sessionStorage.setItem('detectedMaterials', JSON.stringify(detectedMaterials));
       
       // Store scan in database if user is logged in
       try {
